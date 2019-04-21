@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="BetaPlus_Bukkit:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BetaPlus_Bukkit_jar</output-path>
+    <root id="archive" name="BetaPlus_Bukkit.jar">
+      <element id="module-output" name="BetaPlus_Bukkit" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/spigot-api-1.13.2-R0.1-20190416.105208-207.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

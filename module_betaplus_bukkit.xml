@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_betaplus_bukkit" default="compile.module.betaplus_bukkit">
+  <dirname property="module.betaplus_bukkit.basedir" file="${ant.file.module_betaplus_bukkit}"/>
+  
+  <property name="module.jdk.home.betaplus_bukkit" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.betaplus_bukkit" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.betaplus_bukkit" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.betaplus_bukkit" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="betaplus_bukkit.output.dir" value="${module.betaplus_bukkit.basedir}/out/production/BetaPlus_Bukkit"/>
+  <property name="betaplus_bukkit.testoutput.dir" value="${module.betaplus_bukkit.basedir}/out/test/BetaPlus_Bukkit"/>
+  
+  <path id="betaplus_bukkit.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="betaplus_bukkit.module.production.classpath">
+    <path refid="${module.jdk.classpath.betaplus_bukkit}"/>
+    <pathelement location="${basedir}/../../../Downloads/spigot-api-1.13.2-R0.1-20190416.105208-207.jar"/>
+  </path>
+  
+  <path id="betaplus_bukkit.runtime.production.module.classpath">
+    <pathelement location="${betaplus_bukkit.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/spigot-api-1.13.2-R0.1-20190416.105208-207.jar"/>
+  </path>
+  
+  <path id="betaplus_bukkit.module.classpath">
+    <path refid="${module.jdk.classpath.betaplus_bukkit}"/>
+    <pathelement location="${betaplus_bukkit.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/spigot-api-1.13.2-R0.1-20190416.105208-207.jar"/>
+  </path>
+  
+  <path id="betaplus_bukkit.runtime.module.classpath">
+    <pathelement location="${betaplus_bukkit.testoutput.dir}"/>
+    <pathelement location="${betaplus_bukkit.output.dir}"/>
+    <pathelement location="${basedir}/../../../Downloads/spigot-api-1.13.2-R0.1-20190416.105208-207.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.betaplus_bukkit">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.betaplus_bukkit">
+    <patternset refid="excluded.from.module.betaplus_bukkit"/>
+  </patternset>
+  
+  <path id="betaplus_bukkit.module.sourcepath">
+    <dirset dir="${module.betaplus_bukkit.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.betaplus_bukkit" depends="compile.module.betaplus_bukkit.production,compile.module.betaplus_bukkit.tests" description="Compile module BetaPlus_Bukkit"/>
+  
+  <target name="compile.module.betaplus_bukkit.production" depends="register.custom.compilers" description="Compile module BetaPlus_Bukkit; production classes">
+    <mkdir dir="${betaplus_bukkit.output.dir}"/>
+    <javac2 destdir="${betaplus_bukkit.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.betaplus_bukkit}/javac">
+      <compilerarg line="${compiler.args.betaplus_bukkit}"/>
+      <bootclasspath refid="betaplus_bukkit.module.bootclasspath"/>
+      <classpath refid="betaplus_bukkit.module.production.classpath"/>
+      <src refid="betaplus_bukkit.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.betaplus_bukkit"/>
+    </javac2>
+    
+    <copy todir="${betaplus_bukkit.output.dir}">
+      <fileset dir="${module.betaplus_bukkit.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.betaplus_bukkit.tests" depends="register.custom.compilers,compile.module.betaplus_bukkit.production" description="compile module BetaPlus_Bukkit; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.betaplus_bukkit" description="cleanup module">
+    <delete dir="${betaplus_bukkit.output.dir}"/>
+    <delete dir="${betaplus_bukkit.testoutput.dir}"/>
+  </target>
+</project>
