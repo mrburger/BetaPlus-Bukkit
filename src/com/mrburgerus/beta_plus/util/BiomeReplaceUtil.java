@@ -1,37 +1,34 @@
 package com.mrburgerus.beta_plus.util;
 
-import org.bukkit.Material;
-import org.bukkit.block.Biome;
-
-import static org.bukkit.Material.*;
-import static org.bukkit.generator.ChunkGenerator.ChunkData;
+import net.minecraft.server.v1_13_R2.*;
 
 public class BiomeReplaceUtil
 {
 	/* Converts Biome Array As Generated to a usable Biome Array */
-	public static Biome[] convertBiomeArray(Biome[] BiomeIn)
+	public static BiomeBase[] convertBiomeArray(BiomeBase[] biomesIn)
 	{
-		Biome[] BiomeOut = new Biome[BiomeIn.length];
-		for (int i = 0; i < BiomeOut.length; i++)
+		BiomeBase[] biomesOut = new BiomeBase[biomesIn.length];
+		for (int i = 0; i < biomesOut.length; i++)
 		{
 			int place = (i & 15) << 4 | i >> 4 & 15;
-			BiomeOut[i] = BiomeIn[place];
+			biomesOut[i] = biomesIn[place];
 		}
-		return BiomeOut;
+		return biomesOut;
 	}
 
 	/* Gets the first solid block at a Position */
-	public static int getSolidHeightY(int x, int z, ChunkData chunkData)
+	public static int getSolidHeightY(BlockPosition pos, IChunkAccess chunk)
 	{
 		for (int y = 130; y >= 0; --y)
 		{
 			//DUH
-			Material block = chunkData.getType(x, y, z);
-			if (block != Material.AIR && block != Material.WATER)
+			Block block = chunk.getType(new BlockPosition(pos.getX(), y, pos.getZ())).getBlock();
+			if (block != Blocks.AIR && block != Blocks.WATER)
 			{
 				return y;
 			}
 		}
 		return 0;
 	}
+
 }

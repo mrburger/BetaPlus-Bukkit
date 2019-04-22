@@ -1,67 +1,66 @@
 package com.mrburgerus.beta_plus.world.biome;
 
-import com.mrburgerus.beta_plus.util.MathHelper;
-import org.bukkit.Material;
-import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-
-import static org.bukkit.Material.*;
+import net.minecraft.server.v1_13_R2.BiomeBase;
+import net.minecraft.server.v1_13_R2.Biomes;
+import net.minecraft.server.v1_13_R2.Block;
+import net.minecraft.server.v1_13_R2.Blocks;
 
 public enum EnumBetaPlusBiome implements IBetaPlusBiome
 {
 	//Enums
-	rainforest(Biome.JUNGLE),
-	swampland(Biome.SWAMP),
-	seasonalForest(Biome.DARK_FOREST),
-	forest(Biome.FOREST),
-	savanna(Biome.SAVANNA),
-	shrubland(Biome.PLAINS),
-	taiga(Biome.SNOWY_TAIGA),
-	desert(Biome.DESERT, SAND, SAND),
-	plains(Biome.PLAINS),
-	tundra(Biome.SNOWY_TUNDRA),
+	rainforest(Biomes.JUNGLE),
+	swampland(Biomes.SWAMP),
+	seasonalForest(Biomes.DARK_FOREST),
+	forest(Biomes.FOREST),
+	savanna(Biomes.SAVANNA),
+	shrubland(Biomes.PLAINS),
+	taiga(Biomes.SNOWY_TAIGA),
+	desert(Biomes.DESERT, Blocks.SAND, Blocks.SAND),
+	plains(Biomes.PLAINS),
+	tundra(Biomes.SNOWY_TUNDRA),
 	//New Enums
-	warmOcean(Biome.WARM_OCEAN),
-	lukewarmOcean(Biome.LUKEWARM_OCEAN),
-	deepLukewarmOcean(Biome.DEEP_LUKEWARM_OCEAN),
-	coldOcean(Biome.COLD_OCEAN),
-	deepColdOcean(Biome.DEEP_COLD_OCEAN),
-	beach(Biome.BEACH),
-	roofForest(Biome.DARK_FOREST),
-	mountain(Biome.WOODED_MOUNTAINS),
-	iceSpikes(Biome.ICE_SPIKES),
-	megaTaiga(Biome.GIANT_SPRUCE_TAIGA),
-	birchForest(Biome.BIRCH_FOREST),
-	flowerPlains(Biome.SUNFLOWER_PLAINS),
-	flowerForest(Biome.FLOWER_FOREST),
-	defaultB(Biome.PLAINS);
+	warmOcean(Biomes.WARM_OCEAN),
+	lukewarmOcean(Biomes.LUKEWARM_OCEAN),
+	deepLukewarmOcean(Biomes.DEEP_LUKEWARM_OCEAN),
+	coldOcean(Biomes.COLD_OCEAN),
+	deepColdOcean(Biomes.DEEP_COLD_OCEAN),
+	beach(Biomes.BEACH),
+	roofForest(Biomes.DARK_FOREST),
+	mountain(Biomes.WOODED_MOUNTAINS),
+	iceSpikes(Biomes.ICE_SPIKES),
+	megaTaiga(Biomes.GIANT_SPRUCE_TAIGA),
+	mesa(Biomes.BADLANDS, Blocks.TERRACOTTA, Blocks.TERRACOTTA),
+	birchForest(Biomes.BIRCH_FOREST),
+	flowerPlains(Biomes.SUNFLOWER_PLAINS),
+	flowerForest(Biomes.FLOWER_FOREST),
+	defaultB(Biomes.PLAINS);
 
 	//Overrides
 	@Override
-	public Biome getHandle()
+	public BiomeBase getHandle()
 	{
 		return handle;
 	}
 
 	@Override
-	public void setHandle(Biome biomeHandle)
+	public void setHandle(BiomeBase biomeHandle)
 	{
 		handle = biomeHandle;
 	}
 
 	//Fields
-	public Biome handle;
-	public final Material topBlock;
-	public final Material fillerBlock;
-	private static final Biome[] BIOME_LOOKUP_TABLE;
+	public BiomeBase handle;
+	public final Block topBlock;
+	public final Block fillerBlock;
+	private static final BiomeBase[] BIOME_LOOKUP_TABLE;
 
 	//Constructors
-	EnumBetaPlusBiome(Biome handle)
+	EnumBetaPlusBiome(BiomeBase handle)
 	{
-		this(handle, GRASS_BLOCK, DIRT);
+		this(handle, Blocks.GRASS_BLOCK, Blocks.DIRT);
 	}
 
-	EnumBetaPlusBiome(Biome biomeHandle, Material top, Material filler)
+	EnumBetaPlusBiome(BiomeBase biomeHandle, Block top, Block filler)
 	{
 		handle = biomeHandle;
 		topBlock = top;
@@ -71,7 +70,7 @@ public enum EnumBetaPlusBiome implements IBetaPlusBiome
 	//Initialize
 	static
 	{
-		BIOME_LOOKUP_TABLE = new Biome[4096];
+		BIOME_LOOKUP_TABLE = new BiomeBase[4096];
 		EnumBetaPlusBiome.generateBiomeLookup();
 	}
 
@@ -89,15 +88,15 @@ public enum EnumBetaPlusBiome implements IBetaPlusBiome
 	}
 
 	//Gets Value
-	public static Biome getBiomeFromLookup(double temperature, double humidity)
+	public static BiomeBase getBiomeFromLookup(double temperature, double humidity)
 	{
-		int i = (int) (MathHelper.clamp(temperature, 0.0, 1.0) * 63.0);
-		int j = (int) (MathHelper.clamp(humidity, 0.0, 1.0) * 63.0);
+		int i = (int) (temperature * 63.0);
+		int j = (int) (humidity * 63.0);
 		return BIOME_LOOKUP_TABLE[i + j * 64];
 	}
 
 	// Convert Biome map to Enum Map, Respective.
-	public static EnumBetaPlusBiome[] convertBiomeTable(Biome[] biomeLookupTable)
+	public static EnumBetaPlusBiome[] convertBiomeTable(BiomeBase[] biomeLookupTable)
 	{
 		// Create Equal Length Array
 		EnumBetaPlusBiome[] biomePlus = new EnumBetaPlusBiome[biomeLookupTable.length];

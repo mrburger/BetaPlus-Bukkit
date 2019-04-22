@@ -38,7 +38,7 @@ public class NoiseGeneratorOctavesBiome extends AbstractOctavesGenerator
 		double mult2 = 1.0D;
 		for (int i = 0; i < bound; i++)
 		{
-			// Assign y = 0 since Biome are only based on Y
+			// Assign y = 0 since Biomes are only based on Y
 			generatorCollection[i].generate(doubles, xChunk, 0, zChunk, xSize, 0, zSize, var8 * mult2, 0, var10 * mult2, 0.55D / mult1);
 			//generatorCollection[i].generateN(doubles, xChunk, zChunk, xSize, zSize, var8 * mult2, var10 * mult2, 0.55D / mult1);
 			mult2 *= amplitude2;

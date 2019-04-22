@@ -1,6 +1,6 @@
 package com.mrburgerus.beta_plus.world.biome;
 
-import org.bukkit.block.Biome;
+import net.minecraft.server.v1_13_R2.BiomeBase;
 
 public class BetaPlusBiomeSelector
 {
@@ -13,7 +13,7 @@ public class BetaPlusBiomeSelector
 
 
 	// ORIGINAL GANGSTA
-	public static Biome getBiome(float temperature, float humidity)
+	public static BiomeBase getBiome(float temperature, float humidity)
 	{
 		humidity *= temperature;
 		if (temperature < COLD_VALUE)
@@ -62,6 +62,10 @@ public class BetaPlusBiomeSelector
 		}
 		if (humidity < 0.2)
 		{
+			if (temperature > VERY_HOT_VAL && humidity <= 0.0025)
+			{
+				return EnumBetaPlusBiome.mesa.handle;
+			}
 			return EnumBetaPlusBiome.desert.handle;
 		}
 		if (humidity > 0.75D)

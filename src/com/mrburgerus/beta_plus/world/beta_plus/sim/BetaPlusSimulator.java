@@ -1,15 +1,17 @@
 package com.mrburgerus.beta_plus.world.beta_plus.sim;
 
+import com.mojang.datafixers.util.Pair;
 import com.mrburgerus.beta_plus.util.AbstractWorldSimulator;
-import com.mrburgerus.beta_plus.util.ChunkPos;
 import com.mrburgerus.beta_plus.world.noise.NoiseGeneratorOctavesBeta;
-import com.sun.tools.javac.util.Pair;
+import net.minecraft.server.v1_13_R2.BlockPosition;
+import net.minecraft.server.v1_13_R2.ChunkCoordIntPair;
+import net.minecraft.server.v1_13_R2.World;
 
 public class BetaPlusSimulator extends AbstractWorldSimulator
 {
-	public BetaPlusSimulator(long seed)
+	public BetaPlusSimulator(World world)
 	{
-		super(seed);
+		super(world);
 		// Remember to assign values EXACTLY the same way, otherwise the .next[X]() value order will be disturbed.
 		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
 		octaves2 = new NoiseGeneratorOctavesBeta(rand, 16);
@@ -101,18 +103,18 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 	}
 
 	@Override
-	protected int simulateYZeroZeroChunk(ChunkPos pos)
+	protected int simulateYZeroZeroChunk(ChunkCoordIntPair pos)
 	{
 		return 0;
 	}
 
-	//TODO: SAMPLE EVERY 4 Material (TESTING)
+	//TODO: SAMPLE EVERY 4 BLOCKS (TESTING)
 	// SHOULD WORK
 	@Override
-	protected Pair<int[][], Boolean> simulateChunkYFast(ChunkPos pos)
+	protected Pair<int[][], Boolean> simulateChunkYFast(ChunkCoordIntPair pos)
 	{
 		int[][] output = new int[4][4];
-		heightNoise = generateOctaves(heightNoise, pos.getX() * 4, 0,pos.getZ() * 4, 5, 17, 5);
+		heightNoise = generateOctaves(heightNoise, pos.x * 4, 0,pos.z * 4, 5, 17, 5);
 		for (int cX = 0; cX < 4; ++cX)
 		{
 			for (int cZ = 0; cZ < 4; ++cZ)
@@ -138,10 +140,10 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 		return Pair.of(output, landValExists(output));
 	}
 
-	protected Pair<int[][], Boolean> simulateChunkYFastOrig(ChunkPos pos)
+	protected Pair<int[][], Boolean> simulateChunkYFastOrig(ChunkCoordIntPair pos)
 	{
 		int[][] output = new int[16][16];
-		heightNoise = generateOctaves(heightNoise, pos.getX() * 4, 0,pos.getZ() * 4, 5, 17, 5);
+		heightNoise = generateOctaves(heightNoise, pos.x * 4, 0,pos.z * 4, 5, 17, 5);
 		for (int cX = 0; cX < 4; ++cX)
 		{
 			for (int cZ = 0; cZ < 4; ++cZ)
@@ -199,35 +201,35 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 	/* Is a block going to be sand according to the simulator? */
 	/* DOES NOT CHECK WHETHER A VALUE IS ACTUALLY ABLE TO BE A BEACH BASED ON Y */
 	/* Check if valid y externally! */
-	public boolean isMaterialandSim(int xPos, int zPos)
+	public boolean isBlockSandSim(BlockPosition pos)
 	{
-		ChunkPos chunkPos = new ChunkPos(xPos, zPos);
-		int xPosChunk = xPos & 15;
-		int zPosChunk = zPos & 15;
+		ChunkCoordIntPair chunkPos = new ChunkCoordIntPair(pos);
+		int xPosChunk = pos.getX() & 15;
+		int zPosChunk = pos.getZ() & 15;
 		if (sandBlockCache.containsKey(chunkPos))
 		{
-				return sandBlockCache.get(chunkPos).fst[xPosChunk][zPosChunk]; // Get boolean array at the position in question, if yes it is sand.
+				return sandBlockCache.get(chunkPos).getFirst()[xPosChunk][zPosChunk]; // Get boolean array at the position in question, if yes it is sand.
 		}
 		else
 		{
-			Pair<boolean[][], Boolean> sandPair = isSandMaterialim(chunkPos);
+			Pair<boolean[][], Boolean> sandPair = isSandBlockSim(chunkPos);
 			sandBlockCache.put(chunkPos, sandPair); // Enter the value
-			return sandPair.fst[xPosChunk][zPosChunk];
+			return sandPair.getFirst()[xPosChunk][zPosChunk];
 		}
 	}
 
 
 	//TODO: TEST
-	/* Simulates sand Material, for spawning on beaches, and Buried Treasure */
-	protected Pair<boolean[][], Boolean> isSandMaterialim(ChunkPos chunkPos)
+	/* Simulates sand blocks, for spawning on beaches, and Buried Treasure */
+	protected Pair<boolean[][], Boolean> isSandBlockSim(ChunkCoordIntPair chunkPos)
 	{
 		// Chunksize is 16
 		boolean[][] outputBool = new boolean[16][16];
 
 		double thirtySecond = 0.03125;
-		this.sandNoise = this.beachNoise.generateNoiseOctaves(this.sandNoise, chunkPos.getX() * 16, chunkPos.getZ() * 16, 0.0, 16, 16, 1, thirtySecond, thirtySecond, 1.0);
-		this.gravelNoise = this.beachNoise.generateNoiseOctaves(this.gravelNoise, chunkPos.getX() * 16, 109.0134, chunkPos.getZ() * 16, 16, 1, 16, thirtySecond, 1.0, thirtySecond);
-		this.stoneNoise = this.surfaceNoise.generateNoiseOctaves(this.stoneNoise, chunkPos.getX() * 16, chunkPos.getZ() * 16, 0.0, 16, 16, 1, thirtySecond * 2.0, thirtySecond * 2.0, thirtySecond * 2.0);
+		this.sandNoise = this.beachNoise.generateNoiseOctaves(this.sandNoise, chunkPos.x * 16, chunkPos.z * 16, 0.0, 16, 16, 1, thirtySecond, thirtySecond, 1.0);
+		this.gravelNoise = this.beachNoise.generateNoiseOctaves(this.gravelNoise, chunkPos.x * 16, 109.0134, chunkPos.z * 16, 16, 1, 16, thirtySecond, 1.0, thirtySecond);
+		this.stoneNoise = this.surfaceNoise.generateNoiseOctaves(this.stoneNoise, chunkPos.x * 16, chunkPos.z * 16, 0.0, 16, 16, 1, thirtySecond * 2.0, thirtySecond * 2.0, thirtySecond * 2.0);
 		for (int z = 0; z < 16; ++z)
 		{
 			for (int x = 0; x < 16; ++x)
@@ -238,7 +240,7 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 				outputBool[x][z] = sandN;
 			}
 		}
-		Pair<boolean[][], Boolean> retPair = Pair.of(outputBool, anyMaterialand(outputBool));
+		Pair<boolean[][], Boolean> retPair = Pair.of(outputBool, anyBlockSand(outputBool));
 		sandBlockCache.put(chunkPos, retPair);
 		return retPair;
 	}

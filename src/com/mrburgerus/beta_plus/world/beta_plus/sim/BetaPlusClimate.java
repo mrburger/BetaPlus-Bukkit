@@ -1,10 +1,11 @@
 package com.mrburgerus.beta_plus.world.beta_plus.sim;
 
 import com.mrburgerus.beta_plus.world.noise.NoiseGeneratorOctavesBiome;
+import net.minecraft.server.v1_13_R2.BlockPosition;
+import net.minecraft.server.v1_13_R2.MathHelper;
+import net.minecraft.server.v1_13_R2.World;
 
 import java.util.Random;
-
-import static com.sun.javafx.util.Utils.clamp;
 
 /* Works */
 public class BetaPlusClimate
@@ -21,22 +22,22 @@ public class BetaPlusClimate
 	private double[] humid2;
 	private double[] noise2;
 
-	public BetaPlusClimate(long seed, double scaleFactor, double multiplier)
+	public BetaPlusClimate(World world, double scaleFactor, double multiplier)
 	{
-		temperatureOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 9871), 4);
-		humidityOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 39811), 4);
-		noiseOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 543321), 2);
+		temperatureOctave = new NoiseGeneratorOctavesBiome(new Random(world.getSeed() * 9871), 4);
+		humidityOctave = new NoiseGeneratorOctavesBiome(new Random(world.getSeed() * 39811), 4);
+		noiseOctave = new NoiseGeneratorOctavesBiome(new Random(world.getSeed() * 543321), 2);
 		scaleVal = scaleFactor;
 		mult = multiplier;
 	}
 
 	// Working Feb 21, 2019
 	/* Gets Climate Values */
-	public double[] getClimateValuesatPos(int x, int z)
+	public double[] getClimateValuesatPos(BlockPosition pos)
 	{
 		//Copied Over
-		int startX = x;
-		int startZ = z;
+		int startX = pos.getX();
+		int startZ = pos.getZ();
 		int xSize = 1;
 
 		temps2 = temperatureOctave.generateOctaves(temps2, startX, startZ, xSize, xSize, scaleVal, scaleVal, 0.25);
@@ -51,11 +52,11 @@ public class BetaPlusClimate
 		point99 = 1.0 - oneHundredth;
 		double humidityVal = (humid2[0] * 0.15 + 0.5) * point99 + var9 * oneHundredth;
 		temperatureVal = 1.0 - (1.0 - temperatureVal) * (1.0 - temperatureVal);
-		temperatureVal = clamp(temperatureVal, 0.0, 1.0);
-		humidityVal = clamp(humidityVal, 0.0, 1.0);
+		temperatureVal = MathHelper.a(temperatureVal, 0.0, 1.0);
+		humidityVal = MathHelper.a(humidityVal, 0.0, 1.0);
 
 		//BetaPlus.LOGGER.info("T: " + temperatureVal + " H: " + humidityVal);
 
-		return new double[]{clamp(temperatureVal, 0.0, 1.0), clamp(humidityVal, 0.0, 1.0)};
+		return new double[]{MathHelper.a(temperatureVal, 0.0, 1.0), MathHelper.a(humidityVal, 0.0, 1.0)};
 	}
 }

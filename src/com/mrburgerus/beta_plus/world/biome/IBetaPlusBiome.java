@@ -1,12 +1,12 @@
 package com.mrburgerus.beta_plus.world.biome;
 
-import org.bukkit.block.Biome;
+import net.minecraft.server.v1_13_R2.BiomeBase;
 
 public interface IBetaPlusBiome
 {
 	String name();
 
-	Biome getHandle();
+	BiomeBase getHandle();
 
-	void setHandle(Biome handle);
+	void setHandle(BiomeBase handle);
 }

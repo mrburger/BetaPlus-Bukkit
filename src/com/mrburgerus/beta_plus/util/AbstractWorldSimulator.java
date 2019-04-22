@@ -1,7 +1,10 @@
 package com.mrburgerus.beta_plus.util;
 
+import com.mojang.datafixers.util.Pair;
 import com.mrburgerus.beta_plus.world.noise.AbstractOctavesGenerator;
-import com.sun.tools.javac.util.Pair;
+import net.minecraft.server.v1_13_R2.BlockPosition;
+import net.minecraft.server.v1_13_R2.ChunkCoordIntPair;
+import net.minecraft.server.v1_13_R2.World;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -39,15 +42,16 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 	/* DATA CACHED HERE */
 	/* The Pair is simply a Y Average for the ChunkPos and whether any values fall above sea level */
 	// 1x1 Averages Cache
-	protected HashMap<ChunkPos, Pair<Integer, Boolean>> yCache;
+	protected HashMap<ChunkCoordIntPair, Pair<Integer, Boolean>> yCache;
 	// 3x3 Averages Cache
-	protected HashMap<ChunkPos, Pair<Integer, Boolean>> avgYCache;
+	protected HashMap<ChunkCoordIntPair, Pair<Integer, Boolean>> avgYCache;
 	// Sand Block Cache
-	protected HashMap<ChunkPos, Pair<boolean[][], Boolean>> sandBlockCache;
+	protected HashMap<ChunkCoordIntPair, Pair<boolean[][], Boolean>> sandBlockCache;
 
 	// Constructor of Abstract Type
-	protected AbstractWorldSimulator(long seed)
+	protected AbstractWorldSimulator(World world)
 	{
+		seed = world.getSeed();
 		rand = new Random(seed);
 		//seaLevel = world.getSeaLevel();
 
@@ -55,16 +59,15 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 		yCache = new HashMap<>();
 		avgYCache = new HashMap<>();
 		sandBlockCache = new HashMap<>();
-		this.seed = seed;
 	}
 
 	/* Averages a Chunk's Y Coordinates, pretty useful */
-	private Pair<Integer, Boolean> getSimulatedAvg(ChunkPos pos)
+	private Pair<Integer, Boolean> getSimulatedAvg(ChunkCoordIntPair pos)
 	{
 		Pair<int[][], Boolean> chunkSimY = simulateChunkYFast(pos);
 		int sum = 0;
 		int numE = 0;
-		for (int[] chunkSimA : chunkSimY.fst)
+		for (int[] chunkSimA : chunkSimY.getFirst())
 		{
 			for (int chunkSimB : chunkSimA)
 			{
@@ -76,14 +79,14 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 		int yAvg =  Math.floorDiv(sum, numE);
 		// Removed cache put
 
-		return Pair.of(yAvg, chunkSimY.snd);
+		return Pair.of(yAvg, chunkSimY.getSecond());
 	}
 
 	/* Simulate, then Average a 3x3 chunk area centered on the ChunkPos */
 	// WARNING: COULD BE WRONG
-	public Pair<Integer, Boolean> simulateYAvg(int xP, int zP)
+	public Pair<Integer, Boolean> simulateYAvg(BlockPosition blockPos)
 	{
-		ChunkPos chunkPosForUse = new ChunkPos(xP, zP);
+		ChunkCoordIntPair chunkPosForUse = new ChunkCoordIntPair(blockPos);
 		if (avgYCache.containsKey(chunkPosForUse))
 		{
 			// Fixed!
@@ -97,15 +100,15 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 			int size = 1; // Could cause issues with the Y value average being weird and assigning a bunch
 			// If any chunk has a value above sea level
 			boolean hasValueAbove = false;
-			for (int xChunk = chunkPosForUse.getX() - size; xChunk <= chunkPosForUse.getX() + size; ++xChunk)
+			for (int xChunk = chunkPosForUse.x - size; xChunk <= chunkPosForUse.x + size; ++xChunk)
 			{
 				// Fixed looping error
-				for (int zChunk = chunkPosForUse.getZ() - size; zChunk <= chunkPosForUse.getZ() + size; ++zChunk)
+				for (int zChunk = chunkPosForUse.z - size; zChunk <= chunkPosForUse.z + size; ++zChunk)
 				{
-					Pair<Integer, Boolean> posPair = getSimulatedAvg(new ChunkPos(xChunk, zChunk));
+					Pair<Integer, Boolean> posPair = getSimulatedAvg(new ChunkCoordIntPair(xChunk, zChunk));
 					//BetaPlus.LOGGER.info("Pos: " + new ChunkPos(xChunk, zChunk) + " ; " + posPair.getFirst());
-					sum += posPair.fst;
-					if (posPair.snd)
+					sum += posPair.getFirst();
+					if (posPair.getSecond())
 					{
 						hasValueAbove = true;
 					}
@@ -126,15 +129,15 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 	protected abstract double[] generateOctaves(double[] values, int xChunkMult, int yValueZero, int zChunkMult, int size1, int size2, int size3);
 
 	/* Simulates Y at (0, 0) in Chunk. */
-	protected abstract int simulateYZeroZeroChunk(ChunkPos pos);
+	protected abstract int simulateYZeroZeroChunk(ChunkCoordIntPair pos);
 
-	/* Simulate Every 4 Material in a Chunk */
-	protected abstract Pair<int[][], Boolean> simulateChunkYFast(ChunkPos pos);
+	/* Simulate Every 4 Blocks in a Chunk */
+	protected abstract Pair<int[][], Boolean> simulateChunkYFast(ChunkCoordIntPair pos);
 
 	/* Simulates a single chunk's average */
-	public Pair<Integer, Boolean> simulateYChunk(int xPos, int zPos)
+	public Pair<Integer, Boolean> simulateYChunk(BlockPosition pos)
 	{
-		ChunkPos chunkPosForUse = new ChunkPos(xPos, zPos);
+		ChunkCoordIntPair chunkPosForUse = new ChunkCoordIntPair(pos);
 
 		if (yCache.containsKey(chunkPosForUse))
 		{
@@ -164,8 +167,8 @@ public abstract class AbstractWorldSimulator implements IWorldSimulator
 		return false;
 	}
 
-	/* If ANY Material in the chunk applied sand */
-	protected boolean anyMaterialand(boolean[][] sandSimulated)
+	/* If ANY blocks in the chunk applied sand */
+	protected boolean anyBlockSand(boolean[][] sandSimulated)
 	{
 		for(boolean[] simulated : sandSimulated)
 		{
