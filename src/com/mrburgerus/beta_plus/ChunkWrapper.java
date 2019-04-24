@@ -1,123 +1,29 @@
 package com.mrburgerus.beta_plus;
 
+import com.mrburgerus.beta_plus.world.AbstractOldChunkGenerator;
+import com.mrburgerus.beta_plus.world.beta_plus.ChunkGeneratorBetaPlus;
 import net.minecraft.server.v1_13_R2.*;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.LongSet;
-import org.bukkit.craftbukkit.v1_13_R2.generator.InternalChunkGenerator;
+import org.bukkit.World;
+import org.bukkit.generator.BlockPopulator;
+import org.bukkit.generator.ChunkGenerator;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
 
-public class ChunkWrapper extends InternalChunkGenerator<GeneratorSettings>
+public class ChunkWrapper extends ChunkGenerator
 {
-	public final ChunkGenerator actualGenerator;
+	public final AbstractOldChunkGenerator<GeneratorSettingsOverworld> actualGenerator;
 
-	public ChunkWrapper (ChunkGenerator chunkGenerator)
+	public ChunkWrapper(AbstractOldChunkGenerator chunkGenerator)
 	{
 		actualGenerator = chunkGenerator;
 	}
 
 	@Override
-	public void createChunk(IChunkAccess iChunkAccess)
+	public ChunkData generateChunkData(World world, Random random, int x, int z, BiomeGrid biome)
 	{
-		actualGenerator.createChunk(iChunkAccess);
-	}
-
-	@Override
-	public void addFeatures(RegionLimitedWorldAccess regionLimitedWorldAccess, WorldGenStage.Features features)
-	{
-		actualGenerator.addFeatures(regionLimitedWorldAccess, features);
-	}
-
-	@Override
-	public void addDecorations(RegionLimitedWorldAccess regionLimitedWorldAccess)
-	{
-		actualGenerator.addDecorations(regionLimitedWorldAccess);
-	}
-
-	@Override
-	public void addMobs(RegionLimitedWorldAccess regionLimitedWorldAccess)
-	{
-		actualGenerator.addMobs(regionLimitedWorldAccess);
-	}
-
-	@Override
-	public List<BiomeBase.BiomeMeta> getMobsFor(EnumCreatureType enumCreatureType, BlockPosition blockPosition)
-	{
-		return actualGenerator.getMobsFor(enumCreatureType, blockPosition);
-	}
-
-	@Nullable
-	@Override
-	public BlockPosition findNearestMapFeature(World world, String s, BlockPosition blockPosition, int i, boolean b)
-	{
-		return actualGenerator.findNearestMapFeature(world, s, blockPosition, i, b);
-	}
-
-	@Override
-	public GeneratorSettings getSettings()
-	{
+		System.out.println("Generating Data");
+		actualGenerator.createChunk(new ProtoChunk(x, z, new ChunkConverter(new NBTTagCompound())));
 		return null;
-	}
-
-	@Override
-	public int a(World world, boolean b, boolean b1)
-	{
-		return 0;
-	}
-
-	@Override
-	public WorldChunkManager getWorldChunkManager()
-	{
-		return null;
-	}
-
-	@Override
-	public long getSeed()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getSpawnHeight()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getGenerationDepth()
-	{
-		return 0;
-	}
-
-	@Override
-	public World getWorld()
-	{
-		return null;
-	}
-
-	@Override
-	public Long2ObjectMap<LongSet> getStructureCache(StructureGenerator structureGenerator)
-	{
-		return null;
-	}
-
-	@Override
-	public Long2ObjectMap<StructureStart> getStructureStartCache(StructureGenerator structureGenerator)
-	{
-		return null;
-	}
-
-	@Nullable
-	@Override
-	public WorldGenFeatureConfiguration getFeatureConfiguration(BiomeBase biomeBase, StructureGenerator structureGenerator)
-	{
-		return null;
-	}
-
-	@Override
-	public boolean canSpawnStructure(BiomeBase biomeBase, StructureGenerator structureGenerator)
-	{
-		return false;
 	}
 }

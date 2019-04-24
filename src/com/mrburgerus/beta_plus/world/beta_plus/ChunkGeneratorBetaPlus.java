@@ -1,20 +1,24 @@
 package com.mrburgerus.beta_plus.world.beta_plus;
 
+import com.google.common.collect.Maps;
 import com.mrburgerus.beta_plus.util.BiomeReplaceUtil;
 import com.mrburgerus.beta_plus.util.DeepenOceanUtil;
+import com.mrburgerus.beta_plus.world.AbstractOldChunkGenerator;
 import com.mrburgerus.beta_plus.world.biome.EnumBetaPlusBiome;
 import com.mrburgerus.beta_plus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_13_R2.*;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.longs.LongSet;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 
 
 /* SEE CHUNKGENERATOROVERWORLD.CLASS FOR BASE */
+/* ALSO SEE CHUNKGENERATORABSTRACT */
 
-public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSettings>
+public class ChunkGeneratorBetaPlus extends AbstractOldChunkGenerator<BetaPlusGenSettings>
 {
 	// Fields
 	private Random rand;
@@ -42,11 +46,15 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSe
 	private static final int CHUNK_SIZE = 16;
 	private BetaPlusGenSettings settings;
 	private final MobSpawnerPhantom phantomSpawner = new MobSpawnerPhantom();
+	private World worldObj;
+
+	// NEW NEW FIELDS
+	protected final Map<StructureGenerator<? extends WorldGenFeatureConfiguration>, Long2ObjectMap<StructureStart>> structureStartCache = Maps.newHashMap();
+	protected final Map<StructureGenerator<? extends WorldGenFeatureConfiguration>, Long2ObjectMap<LongSet>> structureReferenceCache = Maps.newHashMap();
 
 	public ChunkGeneratorBetaPlus(World world, BiomeProviderBetaPlus biomeProvider, BetaPlusGenSettings settingsIn)
 	{
-		super(world, biomeProvider);
-
+		this.worldObj = world;
 		rand = new Random(world.getSeed());
 		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
 		octaves2 = new NoiseGeneratorOctavesBeta(rand, 16);
@@ -90,6 +98,57 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSe
 	}
 
 	@Override
+	public void addFeatures(RegionLimitedWorldAccess regionLimitedWorldAccess, WorldGenStage.Features features)
+	{
+		SeededRandom seededrandom = new SeededRandom(getSeed());
+		boolean flag = true;
+		int i = regionLimitedWorldAccess.a();
+		int j = regionLimitedWorldAccess.b();
+		BitSet bitset = regionLimitedWorldAccess.getChunkAt(i, j).a(features);
+
+		for(int k = i - 8; k <= i + 8; ++k) {
+			for(int l = j - 8; l <= j + 8; ++l) {
+				List<WorldGenCarverWrapper<?>> list = regionLimitedWorldAccess.getChunkProvider().getChunkGenerator().getWorldChunkManager().getBiome(new BlockPosition(k * 16, 0, l * 16), (BiomeBase)null).a(features);
+				ListIterator listiterator = list.listIterator();
+
+				while(listiterator.hasNext()) {
+					int i1 = listiterator.nextIndex();
+					WorldGenCarverWrapper<?> worldgencarverwrapper = (WorldGenCarverWrapper)listiterator.next();
+					seededrandom.c(regionLimitedWorldAccess.getMinecraftWorld().getSeed() + (long)i1, k, l);
+					if (worldgencarverwrapper.a(regionLimitedWorldAccess, seededrandom, k, l, WorldGenFeatureConfiguration.e)) {
+						worldgencarverwrapper.a(regionLimitedWorldAccess, seededrandom, k, l, i, j, bitset, WorldGenFeatureConfiguration.e);
+					}
+				}
+			}
+		}
+
+	}
+
+
+	@Override
+	public void addDecorations(RegionLimitedWorldAccess regionLimitedWorldAccess)
+	{
+		BlockFalling.instaFall = true;
+		int i = regionLimitedWorldAccess.a();
+		int j = regionLimitedWorldAccess.b();
+		int k = i * 16;
+		int l = j * 16;
+		BlockPosition blockposition = new BlockPosition(k, 0, l);
+		BiomeBase biomebase = regionLimitedWorldAccess.getChunkAt(i + 1, j + 1).getBiomeIndex()[0];
+		SeededRandom seededrandom = new SeededRandom();
+		long i1 = seededrandom.a(regionLimitedWorldAccess.getSeed(), k, l);
+		WorldGenStage.Decoration[] aworldgenstage_decoration = WorldGenStage.Decoration.values();
+		int j1 = aworldgenstage_decoration.length;
+
+		for(int k1 = 0; k1 < j1; ++k1) {
+			WorldGenStage.Decoration worldgenstage_decoration = aworldgenstage_decoration[k1];
+			biomebase.a(worldgenstage_decoration, this, regionLimitedWorldAccess, i1, seededrandom, blockposition);
+		}
+
+		BlockFalling.instaFall = false;
+	}
+
+	@Override
 	public void addMobs(RegionLimitedWorldAccess regionlimitedworldaccess)
 	{
 		int i = regionlimitedworldaccess.a();
@@ -103,8 +162,8 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSe
 	@Override
 	public List<BiomeBase.BiomeMeta> getMobsFor(EnumCreatureType enumcreaturetype, BlockPosition blockposition)
 	{
-		BiomeBase biomebase = this.a.getBiome(blockposition);
-		return enumcreaturetype == EnumCreatureType.MONSTER && ((WorldGenFeatureSwampHut)WorldGenerator.l).d(this.a, blockposition) ? WorldGenerator.l.d() : (enumcreaturetype == EnumCreatureType.MONSTER && WorldGenerator.n.b(this.a, blockposition) ? WorldGenerator.n.d() : biomebase.getMobs(enumcreaturetype));
+		BiomeBase biomebase = this.getWorldChunkManager().getBiome(blockposition, Biomes.PLAINS);
+		return enumcreaturetype == EnumCreatureType.MONSTER && ((WorldGenFeatureSwampHut)WorldGenerator.l).d((GeneratorAccess) this.getWorldChunkManager(), blockposition) ? WorldGenerator.l.d() : (enumcreaturetype == EnumCreatureType.MONSTER && WorldGenerator.n.b((GeneratorAccess) this.getWorldChunkManager(), blockposition) ? WorldGenerator.n.d() : biomebase.getMobs(enumcreaturetype));
 	}
 
 	@Override
@@ -122,6 +181,46 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSe
 		return i;
 	}
 
+
+	@Override
+	public boolean canSpawnStructure(BiomeBase biomeBase, StructureGenerator<? extends WorldGenFeatureConfiguration> structureGenerator)
+	{
+		return biomeBase.a(structureGenerator);
+	}
+
+	@Nullable
+	@Override
+	public WorldGenFeatureConfiguration getFeatureConfiguration(BiomeBase biomeBase, StructureGenerator<? extends WorldGenFeatureConfiguration> structureGenerator)
+	{
+		return biomeBase.b(structureGenerator);
+	}
+
+	@Override
+	public Long2ObjectMap<StructureStart> getStructureStartCache(StructureGenerator<? extends WorldGenFeatureConfiguration> structureGenerator)
+	{
+		return this.structureStartCache.computeIfAbsent(structureGenerator, (p_203225_0_) -> Long2ObjectMaps.synchronize(new ExpiringMap<>(8192, 10000)));
+	}
+
+	@Override
+	public Long2ObjectMap<LongSet> getStructureCache(StructureGenerator<? extends WorldGenFeatureConfiguration> structureGenerator)
+	{
+		return this.structureReferenceCache.computeIfAbsent(structureGenerator, (p_203226_0_) -> {
+			return Long2ObjectMaps.synchronize(new ExpiringMap<>(8192, 10000));
+		});
+	}
+
+	@Override
+	public WorldChunkManager getWorldChunkManager()
+	{
+		return biomeProviderS;
+	}
+
+	@Override
+	public long getSeed()
+	{
+		return worldObj.getSeed();
+	}
+
 	@Override
 	public int getSpawnHeight()
 	{
@@ -129,10 +228,17 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<BetaPlusGenSe
 	}
 
 	@Override
-	public double[] a(int i, int i1)
+	public int getGenerationDepth()
 	{
-		return new double[0];
+		return 0;
 	}
+
+	@Override
+	public World getWorld()
+	{
+		return worldObj;
+	}
+
 
 
 	/* -- GENERATION METHODS -- */

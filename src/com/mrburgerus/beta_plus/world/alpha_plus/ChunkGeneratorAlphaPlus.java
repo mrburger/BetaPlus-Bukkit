@@ -5,9 +5,7 @@ import com.mrburgerus.beta_plus.util.DeepenOceanUtil;
 import com.mrburgerus.beta_plus.world.noise.NoiseGeneratorOctavesAlpha;
 import net.minecraft.server.v1_13_R2.*;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 public class ChunkGeneratorAlphaPlus extends ChunkGeneratorAbstract<AlphaPlusGenSettings>
@@ -455,15 +453,17 @@ public class ChunkGeneratorAlphaPlus extends ChunkGeneratorAbstract<AlphaPlusGen
 	}
 
 
-	@Nullable
+	/*
+	// DEBUG ONLY
 	@Override
-	public BlockPosition findNearestMapFeature(World world, String s, BlockPosition blockposition, int i, boolean flag)
+	public boolean hasStructure(Biome biomeIn, Structure structureIn)
 	{
-		StructureGenerator<?> structure = WorldGenFeatureComposite.aF.get(s.toLowerCase(Locale.ROOT));
-		if (structure != null)
+		if (biomeIn == null)
 		{
-			return structure.getNearestGeneratedFeature(world, this, blockposition, i, flag);
+			BetaPlus.LOGGER.info("NULL BIOME INPUT: " + structureIn);
+			return false;
 		}
-		return null;
+		return biomeIn.hasStructure(structureIn);
 	}
+	*/
 }
