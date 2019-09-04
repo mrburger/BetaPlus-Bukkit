@@ -1,10 +1,9 @@
 package com.mrburgerus.betaplus.world.beta.select;
 
 import com.google.common.collect.Lists;
-import com.mrburgerus.betaplus.world.util.TerrainType;
+import com.mrburgerus.betaplus.util.TerrainType;
 import net.minecraft.server.v1_14_R1.BiomeBase;
 import net.minecraft.server.v1_14_R1.Biomes;
-import org.bukkit.block.Biome;
 
 // Ripped straight from Beta, minimally processed.
 // Should Provide the "Closest" Experience

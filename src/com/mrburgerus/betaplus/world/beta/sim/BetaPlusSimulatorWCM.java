@@ -1,7 +1,8 @@
 package com.mrburgerus.betaplus.world.beta.sim;
 
 import com.mojang.datafixers.util.Pair;
-import com.mrburgerus.betaplus.world.beta.beta_api.BetaPlusBiomeGenerator;
+import com.mrburgerus.betaplus.world.beta.beta_new.WorldChunkManagerBetaPlus;
+import com.mrburgerus.betaplus.world.beta.beta_new.WorldChunkManagerOverworldBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBiome;
 import com.mrburgerus.betaplus.util.AbstractWorldSimulator;
@@ -11,7 +12,7 @@ import java.util.Random;
 
 import static com.mrburgerus.betaplus.world.beta.beta_api.BetaPlusTerrainGenerator.CHUNK_SIZE;
 
-public class BetaPlusSimulator extends AbstractWorldSimulator
+public class BetaPlusSimulatorWCM extends AbstractWorldSimulator
 {
 	// Added for testing 0.5c
 	private NoiseGeneratorOctavesBiome temperatureOctave;
@@ -21,10 +22,26 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 	private double scaleVal;
 	private double mult;
 
-	public BetaPlusSimulator(long seed, BetaPlusBiomeGenerator providerIn)
+	public BetaPlusSimulatorWCM(long seed, WorldChunkManagerBetaPlus providerIn)
 	{
 		super(seed);
-		// Remember to assign values EXACTLY the same way, otherwise the .next[X]() value order will be disturbed.
+		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
+		octaves2 = new NoiseGeneratorOctavesBeta(rand, 16);
+		octaves3 = new NoiseGeneratorOctavesBeta(rand, 8);
+		beachNoise = new NoiseGeneratorOctavesBeta(rand, 4);
+		surfaceNoise = new NoiseGeneratorOctavesBeta(rand, 4);
+		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
+		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
+
+		temperatureOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 9871), 4);
+		humidityOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 39811), 4);
+		scaleVal = providerIn.scaleVal;
+		mult = providerIn.mult;
+	}
+
+	public BetaPlusSimulatorWCM(long seed, WorldChunkManagerOverworldBeta providerIn)
+	{
+		super(seed);
 		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
 		octaves2 = new NoiseGeneratorOctavesBeta(rand, 16);
 		octaves3 = new NoiseGeneratorOctavesBeta(rand, 8);
@@ -39,6 +56,7 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 		scaleVal = providerIn.scaleVal;
 		mult = providerIn.mult;
 	}
+
 
 	@Override
 	protected double[] generateOctaves(double[] values, int xPos, int yValueZero, int zPos, int sizeX, int sizeY, int sizeZ)

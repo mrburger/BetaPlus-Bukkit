@@ -1,4 +1,4 @@
-package com.mrburgerus.betaplus.world.util;
+package com.mrburgerus.betaplus.util;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;

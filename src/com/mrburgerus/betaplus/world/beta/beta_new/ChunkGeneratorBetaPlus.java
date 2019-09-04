@@ -1,26 +1,26 @@
-package com.mrburgerus.betaplus.world.beta.beta_api;
+package com.mrburgerus.betaplus.world.beta.beta_new;
 
-import com.mrburgerus.betaplus.BetaPlusPlugin;
+import com.mrburgerus.betaplus.BetaPlusInjectPlugin;
+import com.mrburgerus.betaplus.util.BiomeReplaceUtil;
 import com.mrburgerus.betaplus.util.DeepenOceanUtil;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_14_R1.*;
 import nl.rutgerkok.worldgeneratorapi.BaseTerrainGenerator;
-import nl.rutgerkok.worldgeneratorapi.internal.bukkitoverrides.InjectedChunkGenerator;
-import org.bukkit.Material;
+import nl.rutgerkok.worldgeneratorapi.internal.WorldDecoratorImpl;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_14_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_14_R1.util.CraftMagicNumbers;
-import org.bukkit.generator.ChunkGenerator;
 
 import java.util.Random;
 
-public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
+public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkGeneratorAbstract<GeneratorSettingsDefault>
 {
+	private final World world;
+	private final MobSpawnerPhantom phantomSpawner = new MobSpawnerPhantom();
+	private final MobSpawnerPatrol patrolSpawner = new MobSpawnerPatrol();
+	private final MobSpawnerCat catSpawner = new MobSpawnerCat();
+	public final WorldDecoratorImpl worldDecorator = new WorldDecoratorImpl();
+
 	private Random rand;
-	private Biome[] biomesForGeneration;
+	private BiomeBase[] biomesForGeneration;
 	//Noise Generators
 	private NoiseGeneratorOctavesBeta octaves1;
 	private NoiseGeneratorOctavesBeta octaves2;
@@ -40,36 +40,17 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 	private double[] gravelNoise = new double[256];
 	private double[] stoneNoise = new double[256];
 	// New Fields
-	private BetaPlusBiomeGenerator biomeProviderS;
+	public WorldChunkManager biomeProviderS;
+
+	//public WorldChunkManagerOverworldBeta biomeProviderS;
 	//private final BetaPlusGenSettings settings;
 	public static final int CHUNK_SIZE = 16;
 
-	// NEW //
-	//private final net.minecraft.server.v1_14_R1.ChunkGenerator<?> internal;
-	//private final GeneratorAccess world;
-
-	public BetaPlusTerrainGenerator(GeneratorAccess world, net.minecraft.server.v1_14_R1.ChunkGenerator<?> chunkGenerator) {
-		if (chunkGenerator instanceof InjectedChunkGenerator) {
-			throw new IllegalArgumentException("Double-wrapping");
-		} else {
-			//this.world = (GeneratorAccess)Objects.requireNonNull(world, "world");
-			//this.internal = (net.minecraft.server.v1_14_R1.ChunkGenerator)Objects.requireNonNull(chunkGenerator, "internal");
-		}
-
-		long seed  = world.getSeed();
-		rand = new Random(seed);
-		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
-		octaves2 = new NoiseGeneratorOctavesBeta(rand, 16);
-		octaves3 = new NoiseGeneratorOctavesBeta(rand, 8);
-		beachBlockNoise = new NoiseGeneratorOctavesBeta(rand, 4);
-		surfaceNoise = new NoiseGeneratorOctavesBeta(rand, 4);
-		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
-		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
-		biomeProviderS = new BetaPlusBiomeGenerator(world.getSeed());
-	}
-
-	public BetaPlusTerrainGenerator(World world)
+	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world)
 	{
+		super(world, world.getChunkProvider().getChunkGenerator().getWorldChunkManager(), 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
+		this.world = world.getWorld();
+
 		long seed  = world.getSeed();
 		rand = new Random(seed);
 		octaves1 = new NoiseGeneratorOctavesBeta(rand, 16);
@@ -79,54 +60,78 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 		surfaceNoise = new NoiseGeneratorOctavesBeta(rand, 4);
 		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
 		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
-		biomeProviderS = new BetaPlusBiomeGenerator(world.getSeed());
+		//biomeProviderS = new WorldChunkManagerBetaPlus(world.getSeed());
+		biomeProviderS = new WorldChunkManagerOverworldBeta(world);
 	}
 
-	// Much like the getHeight from Forge.
 	@Override
-	public int getHeight(int x, int z, HeightType heightType)
+	public void buildBase(IChunkAccess chunkIn)
 	{
-		int[][] valuesInChunk = biomeProviderS.simulator.simulateChunkYFull(new ChunkCoordIntPair(new BlockPosition(x, 0, z))).getFirst();
+		// Get Position
+		int x = chunkIn.getPos().x;
+		int z = chunkIn.getPos().z;
+		// Functions As setBaseChunkSeed(), but broken down.
+		rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
+		// Similar to ChunkGeneratorOverworld
+		biomesForGeneration = biomeProviderS.getBiomeBlock(x * 16, z * 16, 16, 16);
+		// Written similarly to "generateTerrain" from earlier versions.
+		setBlocksInChunk(chunkIn);
+		// Scale factor formerly 2.85
+		DeepenOceanUtil.deepenOcean(chunkIn, rand, BetaPlusInjectPlugin.seaLevel,7, BetaPlusInjectPlugin.oceanYScale);
+
+		// Replace Blocks (DIRT & SAND & STUFF) SEE ABOVE
+		replaceBlocksForBiome(x, z, chunkIn, biomesForGeneration);
+
+		// Set Biomes
+		chunkIn.a(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration));
+	}
+
+	@Override
+	public int getSpawnHeight()
+	{
+		return 64;
+	}
+
+	@Override
+	public void buildNoise(GeneratorAccess generatorAccess, IChunkAccess iChunkAccess)
+	{
+
+	}
+
+	@Override
+	protected double[] a(int i, int i1)
+	{
+		return new double[0];
+	}
+
+	@Override
+	protected double a(double v, double v1, int i)
+	{
+		return 0;
+	}
+
+	@Override
+	public int getBaseHeight(int x, int z, HeightMap.Type type)
+	{
+		int[][] valuesInChunk = ((WorldChunkManagerOverworldBeta) biomeProviderS).simulator.simulateChunkYFull(new ChunkCoordIntPair(new BlockPosition(x, 0, z))).getFirst();
 		// Working!
 		int yRet = valuesInChunk[x & 0x000F][z & 0x000F];
-		if (yRet < BetaPlusPlugin.seaLevel)
+		if (yRet < getSeaLevel())
 		{
-			yRet = BetaPlusPlugin.seaLevel + 1;
+			yRet = getSeaLevel() + 1;
 		}
 		return yRet;
 	}
 
 	@Override
-	public void setBlocksInChunk(GeneratingChunk generatingChunk)
+	protected void a(double[] doubles, int i, int i1)
 	{
-		int x = generatingChunk.getChunkX();
-		int z = generatingChunk.getChunkZ();
-		rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-		biomesForGeneration = biomeProviderS.getBiomes(x * 16, z * 16, 16, 16, false);
 
-		this.setMaterial(generatingChunk);
-		DeepenOceanUtil.deepenOcean(generatingChunk, rand, BetaPlusPlugin.seaLevel, 7, BetaPlusPlugin.oceanYScale);
-
-		//generatingChunk.getBiomeGenerator().getZoomedOutBiome(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration));
-		this.replaceMaterialForBiome(x, z, generatingChunk, biomesForGeneration);
-
-		ChunkGenerator.BiomeGrid biomes = generatingChunk.getBiomesForChunk();
-		// Chunk Size ^2 is the size of the grid
-		for (int r = 0; r < CHUNK_SIZE; ++r)
-		{
-			for (int c = 0; c < CHUNK_SIZE; ++ c)
-			{
-				// Testing
-				int i = c + r * CHUNK_SIZE;
-				//Set Biomes
-				biomes.setBiome(r, c, biomesForGeneration[(i & 15) << 4 | i >> 4 & 15]);
-			}
-		}
 	}
 
-	private void setMaterial(GeneratingChunk chunk)
+	private void setBlocksInChunk(IChunkAccess chunk)
 	{
-		heightNoise = octaveGenerator(heightNoise, chunk.getChunkX() * 4, chunk.getChunkZ() * 4);
+		heightNoise = octaveGenerator(heightNoise, chunk.getPos().x * 4, chunk.getPos().z * 4);
 		for (int i = 0; i < 4; ++i)
 		{
 			for (int j = 0; j < 4; ++j)
@@ -159,18 +164,18 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 							double var50 = (var37 - var35) * var46;
 							for (int n = 0; n < 4; ++n)
 							{
-								Material block = null;
-								if (y < BetaPlusPlugin.seaLevel)
+								Block block = null;
+								if (y < BetaPlusInjectPlugin.seaLevel)
 								{
-									block = Material.WATER;
+									block = Blocks.WATER;
 								}
 								if (var48 > 0.0)
 								{
-									block = Material.STONE;
+									block = Blocks.STONE;
 								}
 								if (block != null)
 								{
-									chunk.getBlocksForChunk().setBlock(x, y, z, block.createBlockData());
+									chunk.setType(new BlockPosition(x, y, z), block.getBlockData(), false);
 								}
 								++z;
 								var48 += var50;
@@ -189,7 +194,6 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 		}
 	}
 
-	/* 1.14, BUKKIT BOOGALOO */
 	private double[] octaveGenerator(double[] values, int xPos, int zPos)
 	{
 		int size1 = 5;
@@ -200,8 +204,8 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 			values = new double[size1 * size2 * size3];
 		}
 		double noiseFactor = 684.412D;
-		double[] temps = biomeProviderS.temperatures;
-		double[] humidities = biomeProviderS.humidities;
+		double[] temps = ((WorldChunkManagerOverworldBeta) biomeProviderS).temperatures;
+		double[] humidities = ((WorldChunkManagerOverworldBeta) biomeProviderS).humidities;
 		octaveArr4 = scaleNoise.generateNoiseOctaves(octaveArr4, xPos, zPos, size1, size3, 1.121, 1.121, 0.5);
 		octaveArr5 = octaves7.generateNoiseOctaves(octaveArr5, xPos, zPos, size1, size3, 200.0, 200.0, 0.5);
 		octaveArr1 = octaves3.generateNoiseOctaves(octaveArr1, xPos, 0, zPos, size1, size2, size3, noiseFactor / 80.0, noiseFactor / 160.0, noiseFactor / 80.0);
@@ -284,10 +288,8 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 		return values;
 	}
 
-	/* YES, IT IS COPIED AND MODIFIED FROM 1.12 */
-	private void replaceMaterialForBiome(int chunkX, int chunkZ, GeneratingChunk chunk, Biome[] biomes)
+	private void replaceBlocksForBiome(int chunkX, int chunkZ, IChunkAccess chunkprimer, BiomeBase[] biomes)
 	{
-		ChunkGenerator.ChunkData data = chunk.getBlocksForChunk();
 		double thirtySecond = 0.03125;
 		this.sandNoise = this.beachBlockNoise.generateNoiseOctaves(this.sandNoise, chunkX * 16, chunkZ * 16, 0.0, 16, 16, 1, thirtySecond, thirtySecond, 1.0);
 		this.gravelNoise = this.beachBlockNoise.generateNoiseOctaves(this.gravelNoise, chunkX * 16, 109.0134, chunkZ * 16, 16, 1, 16, thirtySecond, 1.0, thirtySecond);
@@ -296,107 +298,89 @@ public class BetaPlusTerrainGenerator implements BaseTerrainGenerator
 		{
 			for (int x = 0; x < 16; ++x)
 			{
-				BiomeBase biome = CraftBlock.biomeToBiomeBase(biomes[z + x * 16]);
+				BiomeBase biome = biomes[z + x * 16];
 				boolean sandN = this.sandNoise[z + x * 16] + this.rand.nextDouble() * 0.2 > 0.0;
 				boolean gravelN = this.gravelNoise[z + x * 16] + this.rand.nextDouble() * 0.2 > 3.0;
 				int stoneN = (int) (this.stoneNoise[z + x * 16] / 3.0 + 3.0 + this.rand.nextDouble() * 0.25);
 				int checkVal = -1;
 				// Changed to use the actual Biome Config.
-				BlockData topBlock = CraftMagicNumbers.getMaterial(biome.q().a()).getItemType().createBlockData();
-				BlockData fillerBlock = CraftMagicNumbers.getMaterial(biome.q().b()).getItemType().createBlockData();
+				IBlockData topBlock = biome.q().a();
+				IBlockData fillerBlock = biome.q().b();
+
 				// GO from Top to bottom of world
 				for (int y = 127; y >= 0; --y)
 				{
 					if (y <= this.rand.nextInt(5))
 					{
-						data.setBlock(x, y, z, Material.BEDROCK);
+						chunkprimer.setType(new BlockPosition(x, y, z), Blocks.BEDROCK.getBlockData(), false);
 					}
 					else
 					{
-						Material block = data.getBlockData(x, y, z).getMaterial();
+						Block block = chunkprimer.getType(new BlockPosition(x, y, z)).getBlock();
 
-						if (block == Material.AIR)
+						if (block == Blocks.AIR)
 						{
 							checkVal = -1;
 							continue;
 						}
 
 						//Checks if model already changed
-						if (block != Material.STONE) continue;
+						if (block != Blocks.STONE) continue;
 
 						if (checkVal == -1)
 						{
 							if (stoneN <= 0)
 							{
-								topBlock = Material.AIR.createBlockData();
-								fillerBlock = Material.STONE.createBlockData();
+								topBlock = Blocks.AIR.getBlockData();
+								fillerBlock = Blocks.STONE.getBlockData();
 							}
-							else if (y >= BetaPlusPlugin.seaLevel - 4 && y <= BetaPlusPlugin.seaLevel + 1)
+							else if (y >= BetaPlusInjectPlugin.seaLevel - 4 && y <= BetaPlusInjectPlugin.seaLevel + 1)
 							{
-								topBlock = CraftMagicNumbers.getMaterial(biome.q().a()).getItemType().createBlockData();
-								fillerBlock = CraftMagicNumbers.getMaterial(biome.q().b()).getItemType().createBlockData();
+								topBlock = biome.q().a();
+								fillerBlock = biome.q().b();
 								if (gravelN)
 								{
-									topBlock = Material.AIR.createBlockData();
-									fillerBlock = Material.GRAVEL.createBlockData();
+									topBlock = Blocks.AIR.getBlockData();
+									fillerBlock = Blocks.GRAVEL.getBlockData();
 								}
 								if (sandN)
 								{
-									topBlock = Material.SAND.createBlockData();
-									fillerBlock = Material.SAND.createBlockData();
+									topBlock = Blocks.SAND.getBlockData();
+									fillerBlock = Blocks.SAND.getBlockData();
 								}
 							}
-							if (y < BetaPlusPlugin.seaLevel && topBlock == Material.AIR.createBlockData())
+							if (y < BetaPlusInjectPlugin.seaLevel && topBlock == Blocks.AIR.getBlockData())
 							{
-								topBlock = Material.WATER.createBlockData();
+								topBlock = Blocks.WATER.getBlockData();
 							}
 
-							// Sets top & filler Material
+							// Sets top & filler Blocks
 							checkVal = stoneN;
 							// Test this still.
-							if (y >= BetaPlusPlugin.seaLevel -1)
+							if (y >= BetaPlusInjectPlugin.seaLevel -1)
 							{
-								data.setBlock(x, y, z, topBlock);
+								chunkprimer.setType(new BlockPosition(x, y, z), topBlock, false);
 							}
 							else
 							{
-								data.setBlock(x, y, z, fillerBlock);
+								chunkprimer.setType(new BlockPosition(x, y, z), fillerBlock, false);
 							}
 						}
 						// Add Sandstone (NOT WORKING)
 						else if (checkVal > 0)
 						{
 							--checkVal;
-							data.setBlock(x, y, z, fillerBlock);
+							chunkprimer.setType(new BlockPosition(x, y, z), fillerBlock, false);
 							//Possibly state comparison fucked it
-							if (checkVal == 0 && fillerBlock == Material.SAND.createBlockData())
+							if (checkVal == 0 && fillerBlock == Blocks.SAND.getBlockData())
 							{
 								checkVal = this.rand.nextInt(4);
-								fillerBlock = Material.SANDSTONE.createBlockData();
+								fillerBlock = Blocks.SANDSTONE.getBlockData();
 							}
 						} //END OF Y LOOP
 					}
 				}
 			}
 		}
-	}
-
-	// COPIED METHODS //
-
-	static BaseTerrainGenerator fromMinecraft(World world) {
-		WorldServer worldServer = ((CraftWorld)world).getHandle();
-		net.minecraft.server.v1_14_R1.ChunkGenerator<?> chunkGenerator = worldServer.getChunkProvider().getChunkGenerator();
-		if (chunkGenerator instanceof InjectedChunkGenerator) {
-			return ((InjectedChunkGenerator)chunkGenerator).getBaseTerrainGenerator();
-		} else if (isSupported(chunkGenerator)) {
-			return new BetaPlusTerrainGenerator(worldServer, chunkGenerator);
-		} else {
-			throw new UnsupportedOperationException("Cannot extract base chunk generator from " + chunkGenerator.getClass() + ". \nYou can only customize worlds where the base terrain is generated by Minecraft or using the WorldGeneratorApi methods. If you are using the WorldGeneratorApi methods, make sure that a BaseChunkGenerator was set before other aspects of terrain generation were modified.");
-		}
-	}
-
-	static boolean isSupported(net.minecraft.server.v1_14_R1.ChunkGenerator<?> chunkGenerator)
-	{
-		return chunkGenerator instanceof ChunkProviderDebug || chunkGenerator instanceof ChunkProviderFlat || chunkGenerator instanceof ChunkProviderGenerate || chunkGenerator instanceof ChunkProviderHell || chunkGenerator instanceof ChunkProviderTheEnd;
 	}
 }

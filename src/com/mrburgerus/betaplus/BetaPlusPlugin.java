@@ -25,6 +25,12 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+
+// TODO
+// Inject both the Biome Provider and Chunk Generator into the world.
+
+
+
 public class BetaPlusPlugin extends JavaPlugin implements WorldGeneratorApi, Listener
 {
 	// Fields

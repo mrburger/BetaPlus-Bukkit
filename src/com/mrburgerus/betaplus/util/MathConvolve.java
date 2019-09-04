@@ -1,4 +1,4 @@
-package com.mrburgerus.betaplus.world.util;
+package com.mrburgerus.betaplus.util;
 
 public class MathConvolve
 {

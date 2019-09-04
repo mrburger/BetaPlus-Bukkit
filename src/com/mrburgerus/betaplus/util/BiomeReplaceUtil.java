@@ -1,10 +1,9 @@
-package com.mrburgerus.betaplus.world.util;
+package com.mrburgerus.betaplus.util;
 
-import net.minecraft.server.v1_14_R1.BlockPosition;
+import net.minecraft.server.v1_14_R1.*;
 import nl.rutgerkok.worldgeneratorapi.BaseChunkGenerator;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
-import org.bukkit.generator.ChunkGenerator;
 
 public class BiomeReplaceUtil
 {
@@ -12,6 +11,17 @@ public class BiomeReplaceUtil
 	public static Biome[] convertBiomeArray(Biome[] biomesIn)
 	{
 		Biome[] biomesOut = new Biome[biomesIn.length];
+		for (int i = 0; i < biomesOut.length; i++)
+		{
+			int place = (i & 15) << 4 | i >> 4 & 15;
+			biomesOut[i] = biomesIn[place];
+		}
+		return biomesOut;
+	}
+
+	public static BiomeBase[] convertBiomeArray(BiomeBase[] biomesIn)
+	{
+		BiomeBase[] biomesOut = new BiomeBase[biomesIn.length];
 		for (int i = 0; i < biomesOut.length; i++)
 		{
 			int place = (i & 15) << 4 | i >> 4 & 15;
@@ -49,4 +59,17 @@ public class BiomeReplaceUtil
 		return 0;
 	}
 
+	public static int getSolidHeightY(BlockPosition pos, IChunkAccess chunk)
+	{
+		for (int y = 130; y >= 0; --y)
+		{
+			//DUH
+			Block block = chunk.getType(new BlockPosition(pos.getX(), y, pos.getZ())).getBlock();
+			if (block != Blocks.AIR && block != Blocks.WATER)
+			{
+				return y;
+			}
+		}
+		return 0;
+	}
 }
