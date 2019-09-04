@@ -1,5 +1,6 @@
 name: Beta_Plus
-version: 0.1
+version: 0.3
 author: mrburgerUS
-main: com.mrburgerus.betaplus.BetaPlus
+main: com.mrburgerus.betaplus.BetaPlusPlugin
 api-version: 1.14
+depend: [WorldGeneratorApi]
