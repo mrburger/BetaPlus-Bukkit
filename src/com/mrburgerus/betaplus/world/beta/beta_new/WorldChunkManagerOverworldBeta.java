@@ -50,7 +50,6 @@ public class WorldChunkManagerOverworldBeta extends WorldChunkManagerOverworld
 		this.simulator = new BetaPlusSimulatorWCM(seed, this);
 		selector = new BetaPlusBiomeSelector();
 
-
 		voronoi = new VoronoiNoiseGenerator(seed, (short) 0);
 		biomeNoise = new PerlinNoise(seed);
 	}
@@ -125,6 +124,12 @@ public class WorldChunkManagerOverworldBeta extends WorldChunkManagerOverworld
 
 			return false;
 		});
+	}
+
+	@Override
+	public BiomeBase[] getBiomeBlock(int x, int z, int xSize, int zSize)
+	{
+		return this.generateBiomes(x, z, xSize, zSize, true);
 	}
 
 	@Override

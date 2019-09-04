@@ -10,6 +10,7 @@ import nl.rutgerkok.worldgeneratorapi.internal.WorldDecoratorImpl;
 import org.bukkit.World;
 
 import java.util.Random;
+import java.util.logging.Level;
 
 public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkGeneratorAbstract<GeneratorSettingsDefault>
 {
@@ -40,15 +41,15 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 	private double[] gravelNoise = new double[256];
 	private double[] stoneNoise = new double[256];
 	// New Fields
-	public WorldChunkManager biomeProviderS;
+	public WorldChunkManagerOverworldBeta biomeProviderS;
 
 	//public WorldChunkManagerOverworldBeta biomeProviderS;
 	//private final BetaPlusGenSettings settings;
 	public static final int CHUNK_SIZE = 16;
 
-	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world)
+	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world, WorldChunkManagerOverworldBeta wcm)
 	{
-		super(world, world.getChunkProvider().getChunkGenerator().getWorldChunkManager(), 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
+		super(world, wcm, 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
 		this.world = world.getWorld();
 
 		long seed  = world.getSeed();
@@ -61,8 +62,35 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
 		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
 		//biomeProviderS = new WorldChunkManagerBetaPlus(world.getSeed());
-		biomeProviderS = new WorldChunkManagerOverworldBeta(world);
+		biomeProviderS = wcm;
 	}
+
+	// Added
+	@Override
+	public void createBiomes(IChunkAccess chunkIn)
+	{
+		//BetaPlusInjectPlugin.LOGGER.log(Level.INFO, "Pre Create Biome");
+		int x = chunkIn.getPos().x;
+		int z = chunkIn.getPos().z;
+		biomesForGeneration = biomeProviderS.getBiomeBlock(x * 16, z * 16, 16, 16);
+		//BetaPlusInjectPlugin.LOGGER.log(Level.INFO, "Create Biome");
+		//chunkIn.a(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration));
+		chunkIn.a(biomesForGeneration);
+	}
+
+	/*
+	@Override
+	protected BiomeBase getDecoratingBiome(RegionLimitedWorldAccess regionlimitedworldaccess, BlockPosition blockposition)
+	{
+		return biomeProviderS.getBiome(blockposition.getX(), blockposition.getZ());
+	}
+
+	@Override
+	protected BiomeBase getCarvingBiome(IChunkAccess ichunkaccess)
+	{
+		return biomeProviderS.getBiome(ichunkaccess.getPos().d(), ichunkaccess.getPos().e());
+	}
+	*/
 
 	@Override
 	public void buildBase(IChunkAccess chunkIn)
@@ -73,17 +101,13 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 		// Functions As setBaseChunkSeed(), but broken down.
 		rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
 		// Similar to ChunkGeneratorOverworld
-		biomesForGeneration = biomeProviderS.getBiomeBlock(x * 16, z * 16, 16, 16);
 		// Written similarly to "generateTerrain" from earlier versions.
 		setBlocksInChunk(chunkIn);
 		// Scale factor formerly 2.85
 		DeepenOceanUtil.deepenOcean(chunkIn, rand, BetaPlusInjectPlugin.seaLevel,7, BetaPlusInjectPlugin.oceanYScale);
 
 		// Replace Blocks (DIRT & SAND & STUFF) SEE ABOVE
-		replaceBlocksForBiome(x, z, chunkIn, biomesForGeneration);
-
-		// Set Biomes
-		chunkIn.a(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration));
+		replaceBlocksForBiome(x, z, chunkIn, chunkIn.getBiomeIndex());
 	}
 
 	@Override
@@ -113,7 +137,7 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 	@Override
 	public int getBaseHeight(int x, int z, HeightMap.Type type)
 	{
-		int[][] valuesInChunk = ((WorldChunkManagerOverworldBeta) biomeProviderS).simulator.simulateChunkYFull(new ChunkCoordIntPair(new BlockPosition(x, 0, z))).getFirst();
+		int[][] valuesInChunk = biomeProviderS.simulator.simulateChunkYFull(new ChunkCoordIntPair(new BlockPosition(x, 0, z))).getFirst();
 		// Working!
 		int yRet = valuesInChunk[x & 0x000F][z & 0x000F];
 		if (yRet < getSeaLevel())
@@ -204,8 +228,8 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 			values = new double[size1 * size2 * size3];
 		}
 		double noiseFactor = 684.412D;
-		double[] temps = ((WorldChunkManagerOverworldBeta) biomeProviderS).temperatures;
-		double[] humidities = ((WorldChunkManagerOverworldBeta) biomeProviderS).humidities;
+		double[] temps = biomeProviderS.temperatures;
+		double[] humidities = biomeProviderS.humidities;
 		octaveArr4 = scaleNoise.generateNoiseOctaves(octaveArr4, xPos, zPos, size1, size3, 1.121, 1.121, 0.5);
 		octaveArr5 = octaves7.generateNoiseOctaves(octaveArr5, xPos, zPos, size1, size3, 200.0, 200.0, 0.5);
 		octaveArr1 = octaves3.generateNoiseOctaves(octaveArr1, xPos, 0, zPos, size1, size2, size3, noiseFactor / 80.0, noiseFactor / 160.0, noiseFactor / 80.0);

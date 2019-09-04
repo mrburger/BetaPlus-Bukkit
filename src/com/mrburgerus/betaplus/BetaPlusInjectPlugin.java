@@ -1,6 +1,7 @@
 package com.mrburgerus.betaplus;
 
 import com.mrburgerus.betaplus.world.beta.beta_new.ChunkGeneratorBetaPlus;
+import com.mrburgerus.betaplus.world.beta.beta_new.WorldChunkManagerOverworldBeta;
 import com.mrburgerus.betaplus.world.bukkit.DummyBukkitChunkGeneratorWCM;
 import net.minecraft.server.v1_14_R1.ChunkGenerator;
 import net.minecraft.server.v1_14_R1.ChunkProviderServer;
@@ -8,6 +9,7 @@ import net.minecraft.server.v1_14_R1.WorldChunkManager;
 import net.minecraft.server.v1_14_R1.WorldServer;
 import nl.rutgerkok.worldgeneratorapi.internal.ReflectionUtil;
 import org.bukkit.World;
+import org.bukkit.WorldType;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -51,13 +53,12 @@ public class BetaPlusInjectPlugin extends JavaPlugin implements Listener
 		this.getForWorld(event.getWorld());
 	}
 
+
+	// ALWAYS REPLACES. THAT IS BAD.
 	public void getForWorld(World world)
 	{
 		WorldServer serverWorld = ((CraftWorld) world).getHandle();
-		//new ChunkGeneratorBetaPlus(serverWorld, new WorldChunkManagerBetaPlus(serverWorld.getSeed()), new GeneratorSettingsDefault());
-		//ChunkProviderServer providerServer = (ChunkProviderServer) serverWorld.getChunkProvider();
 		this.replaceChunkGenerator(serverWorld);
-		this.replaceBiomeProvider2(serverWorld);
 	}
 
 	private Class<?> nmsClass(String simpleName) throws ClassNotFoundException {
@@ -66,8 +67,10 @@ public class BetaPlusInjectPlugin extends JavaPlugin implements Listener
 		return Class.forName(name);
 	}
 
-	private void replaceChunkGenerator(WorldServer worldServer) {
-		ChunkGeneratorBetaPlus injected = new ChunkGeneratorBetaPlus(worldServer);
+	private void replaceChunkGenerator(WorldServer worldServer)
+	{
+
+		ChunkGeneratorBetaPlus injected = new ChunkGeneratorBetaPlus(worldServer, new WorldChunkManagerOverworldBeta(worldServer));
 		ChunkProviderServer chunkProvider = worldServer.getChunkProvider();
 
 		try
@@ -92,6 +95,7 @@ public class BetaPlusInjectPlugin extends JavaPlugin implements Listener
 			this.injected = injected;
 			// Why this?
 			worldServer.generator = null;
+			LOGGER.log(Level.INFO, "Finished replace");
 		}
 		catch (ReflectiveOperationException var8)
 		{
@@ -101,23 +105,23 @@ public class BetaPlusInjectPlugin extends JavaPlugin implements Listener
 
 	private void replaceBiomeProvider2(WorldServer worldServer)
 	{
-		WorldChunkManager wcm = injected.biomeProviderS;
+		WorldChunkManagerOverworldBeta wcm = injected.biomeProviderS;
 		ChunkProviderServer chunkProvider = worldServer.getChunkProvider();
 		try
 		{
 			Field chunkGeneratorField = ReflectionUtil.getFieldOfType(chunkProvider, ChunkGenerator.class);
 			ChunkGeneratorBetaPlus chunkGenerator = (ChunkGeneratorBetaPlus) chunkGeneratorField.get(chunkProvider); //was wcm
-			LOGGER.log(Level.INFO, "TEST : " + chunkGenerator.toString());
+			//LOGGER.log(Level.INFO, "TEST : " + chunkGenerator.toString());
 			// Testing
 			chunkGenerator.biomeProviderS = wcm;
-			LOGGER.log(Level.INFO, "TEST2 : " + wcm);
-			LOGGER.log(Level.INFO, "TEST3 : " + chunkGenerator.biomeProviderS);
+			//LOGGER.log(Level.INFO, "TEST2 : " + wcm);
+			//LOGGER.log(Level.INFO, "TEST3 : " + chunkGenerator.biomeProviderS);
 
 
 			//chunkGeneratorField.set(wcm, wcm);
 			//Field biomeField = ReflectionUtil.getFieldOfType(chunkGeneratorField)
 
-			LOGGER.log(Level.INFO, "Success! Injected (supposedly)");
+			//LOGGER.log(Level.INFO, "Success! Injected (supposedly)");
 
 		}
 		catch (Exception e)
