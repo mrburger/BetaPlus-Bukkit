@@ -1,7 +1,5 @@
 name: Beta_Plus
 version: 0.3
 author: mrburgerUS
-#main: com.mrburgerus.betaplus.BetaPlusPlugin
-#main: com.mrburgerus.betaplus.BetaPlusInjectPlugin
 main: com.mrburgerus.betaplus.BetaPlusPlugin
 api-version: 1.14

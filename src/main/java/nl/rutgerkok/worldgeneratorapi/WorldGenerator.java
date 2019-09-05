@@ -24,7 +24,7 @@ public interface WorldGenerator {
      * @deprecated Replaced by {@link #getBaseTerrainGenerator()}.
      */
     @Deprecated
-    BaseChunkGenerator getBaseChunkGenerator() throws UnsupportedOperationException;
+    //BaseChunkGenerator getBaseChunkGenerator() throws UnsupportedOperationException;
 
     /**
      * Gets the basic terrain generator, which places only stone and water usually.
@@ -39,7 +39,7 @@ public interface WorldGenerator {
      *             different stages of world generation. This can also happen if
      *             another plugin is poking around in Minecraft internals.
      */
-    BaseTerrainGenerator getBaseTerrainGenerator() throws UnsupportedOperationException;
+    //BaseTerrainGenerator getBaseTerrainGenerator() throws UnsupportedOperationException;
 
     /**
      * Gets the biome generator currently in use. This method will return a valid

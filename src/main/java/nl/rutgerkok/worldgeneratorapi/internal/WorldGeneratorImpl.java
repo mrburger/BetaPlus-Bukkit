@@ -5,13 +5,10 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 
-import net.minecraft.server.v1_14_R1.ChunkGenerator;
-import net.minecraft.server.v1_14_R1.ChunkProviderServer;
-import net.minecraft.server.v1_14_R1.WorldChunkManager;
-import net.minecraft.server.v1_14_R1.WorldServer;
 import nl.rutgerkok.worldgeneratorapi.BaseChunkGenerator;
 import nl.rutgerkok.worldgeneratorapi.BaseNoiseGenerator;
 import nl.rutgerkok.worldgeneratorapi.BaseTerrainGenerator;
@@ -24,7 +21,7 @@ import nl.rutgerkok.worldgeneratorapi.internal.bukkitoverrides.NoiseToTerrainGen
 
 public final class WorldGeneratorImpl implements WorldGenerator {
 
-    public  @Nullable InjectedChunkGenerator injected;
+    public  @Nullable ChunkGeneratorAbstract injected;
     private final World world;
     private final WorldRef worldRef;
 
@@ -33,6 +30,7 @@ public final class WorldGeneratorImpl implements WorldGenerator {
         this.worldRef = WorldRef.of(world);
     }
 
+    /*
     @Override
     public BaseChunkGenerator getBaseChunkGenerator() throws UnsupportedOperationException {
         return getBaseTerrainGenerator();
@@ -42,13 +40,17 @@ public final class WorldGeneratorImpl implements WorldGenerator {
     public BaseTerrainGenerator getBaseTerrainGenerator() throws UnsupportedOperationException {
         return BaseTerrainGeneratorImpl.fromMinecraft(world);
     }
+    */
 
     @Override
-    public BiomeGenerator getBiomeGenerator() {
-        InjectedChunkGenerator injected = this.injected;
+    public BiomeGenerator getBiomeGenerator()
+    {
+        /*
+        ChunkGeneratorAbstract injected = this.injected;
         if (injected != null) {
             return injected.getBiomeGenerator();
         }
+        */
 
         // Create a new one, based on the currently used biome generator
         WorldChunkManager worldChunkManager = getWorldHandle()
@@ -128,6 +130,40 @@ public final class WorldGeneratorImpl implements WorldGenerator {
         }
     }
 
+    // Added by mrburgerUS for Beta+
+    private void replaceChunkGenerator()
+    {
+        ChunkGeneratorAbstract injected;
+        // Need to inject ourselves into the world
+        injected = new InjectedChunkGenerator(getWorldHandle(), base);
+
+        ChunkProviderServer chunkProvider = getWorldHandle().getChunkProvider();
+        try {
+            Field chunkGeneratorField = ReflectionUtil.getFieldOfType(chunkProvider, ChunkGenerator.class);
+            chunkGeneratorField.set(chunkProvider, injected);
+
+            // Also replace chunk generator in PlayerChunkMap
+            chunkGeneratorField = ReflectionUtil.getFieldOfType(chunkProvider.playerChunkMap, ChunkGenerator.class);
+            chunkGeneratorField.set(chunkProvider.playerChunkMap, injected);
+
+            // Paper only: replace chunk generator in ChunkTaskScheduler
+            try {
+                Field chunkTaskSchedulerField = ReflectionUtil.getFieldOfType(chunkProvider,
+                        nmsClass("ChunkTaskScheduler"));
+                Object scheduler = chunkTaskSchedulerField.get(chunkProvider);
+                chunkGeneratorField = ReflectionUtil.getFieldOfType(scheduler, ChunkGenerator.class);
+                chunkGeneratorField.set(scheduler, injected);
+            } catch (ClassNotFoundException e) {
+                // Ignore, we're not on Paper but on Spigot
+            }
+
+            this.injected = injected;
+            getWorldHandle().generator = null; // Clear out the custom generator
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to inject world generator", e);
+        }
+    }
+
     @Override
     public void setBaseChunkGenerator(BaseChunkGenerator base) {
         this.setBaseTerrainGenerator(new BaseTerrainGenerator() {
@@ -156,7 +192,9 @@ public final class WorldGeneratorImpl implements WorldGenerator {
     }
 
     @Override
-    public void setBaseTerrainGenerator(BaseTerrainGenerator base) {
+    public void setBaseTerrainGenerator(BaseTerrainGenerator base)
+    {
+        /*
         Objects.requireNonNull(base, "base");
         InjectedChunkGenerator injected = this.injected;
         if (injected == null) {
@@ -164,6 +202,7 @@ public final class WorldGeneratorImpl implements WorldGenerator {
         } else {
             injected.setBaseChunkGenerator(base);
         }
+        */
     }
 
 }
