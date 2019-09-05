@@ -17,8 +17,6 @@ import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -67,9 +65,10 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 						BaseTerrainGenerator b = new BetaPlusTerrainGenerator(world);
 						worldGenerator.setBaseTerrainGenerator(b);
 						net.minecraft.server.v1_14_R1.World world1 = ((CraftWorld) world).getHandle();
-						InjectedChunkGenerator chunkGenerator = new InjectedChunkGenerator((WorldServer) world1, new WorldChunkManagerOverworldBeta(world1), b);
-						((WorldGeneratorImpl) worldGenerator).injected = chunkGenerator;
+						//InjectedChunkGenerator chunkGenerator = new InjectedChunkGenerator((WorldServer) world1, new WorldChunkManagerOverworldBeta(world1), b);
+						((WorldGeneratorImpl) worldGenerator).injected = new InjectedChunkGeneratorBeta((WorldServer) world1, new WorldChunkManagerOverworldBeta(world1), b);
 
+						BetaPlusPlugin.LOGGER.log(Level.INFO, ((WorldGeneratorImpl) worldGenerator).injected.toString());
 
 						/*
 						Field f = worldGenerator.getClass().getDeclaredField("injected");

@@ -97,7 +97,8 @@ public abstract class AbstractWorldSimulator
 			int sum = 0;
 			int numE = 0;
 			// size * 2 + 1 is real size in chunks
-			int size = 1;
+			// Modified to 2
+			int size = 2;
 			// If any chunk has a value above sea level
 			boolean hasValueAbove = false;
 			for (int xChunk = ChunkCoordIntPairForUse.x - size; xChunk <= ChunkCoordIntPairForUse.x + size; ++xChunk)

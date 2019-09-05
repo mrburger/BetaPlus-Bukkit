@@ -5,11 +5,17 @@ import com.mrburgerus.betaplus.util.DeepenOceanUtil;
 import com.mrburgerus.betaplus.world.beta.beta_new.WorldChunkManagerOverworldBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_14_R1.*;
+import nl.rutgerkok.worldgeneratorapi.BaseTerrainGenerator;
+import nl.rutgerkok.worldgeneratorapi.internal.ReflectionUtil;
 import nl.rutgerkok.worldgeneratorapi.internal.WorldDecoratorImpl;
+import nl.rutgerkok.worldgeneratorapi.internal.bukkitoverrides.InjectedChunkGenerator;
 
+import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.logging.Level;
 
-public class InjectedChunkGeneratorBeta extends ChunkGeneratorAbstract<GeneratorSettingsDefault>
+public class InjectedChunkGeneratorBeta extends InjectedChunkGenerator
 {
 	private final World world;
 	private final MobSpawnerPhantom phantomSpawner = new MobSpawnerPhantom();
@@ -44,9 +50,9 @@ public class InjectedChunkGeneratorBeta extends ChunkGeneratorAbstract<Generator
 	//private final BetaPlusGenSettings settings;
 	public static final int CHUNK_SIZE = 16;
 
-	public InjectedChunkGeneratorBeta(World world, WorldChunkManagerOverworldBeta wcm)
+	public InjectedChunkGeneratorBeta(WorldServer world, WorldChunkManagerOverworldBeta wcm, BaseTerrainGenerator base)
 	{
-		super(world, wcm, 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
+		super(world, wcm, base);
 		this.world = world;
 
 		long seed  = world.getSeed();
@@ -58,8 +64,20 @@ public class InjectedChunkGeneratorBeta extends ChunkGeneratorAbstract<Generator
 		surfaceNoise = new NoiseGeneratorOctavesBeta(rand, 4);
 		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
 		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
-		//biomeProviderS = newP WorldChunkManagerBetaPlus(world.getSeed());
 		biomeProviderS = wcm;
+		// Reflect and assign?
+		/*
+		try
+		{
+			Field f = ReflectionUtil.getFieldOfType(ChunkGenerator.class, WorldChunkManager.class);
+			f.setAccessible(true);
+			f.set(this.c, this.c);
+		}
+		catch (Exception e1)
+		{
+			e1.printStackTrace();
+		}
+		*/
 	}
 
 	// Added
@@ -170,6 +188,40 @@ public class InjectedChunkGeneratorBeta extends ChunkGeneratorAbstract<Generator
 		this.phantomSpawner.a(worldserver, flag, flag1);
 		this.patrolSpawner.a(worldserver, flag, flag1);
 		this.catSpawner.a(worldserver, flag, flag1);
+	}
+
+	@Override
+	public void createStructures(IChunkAccess ichunkaccess, ChunkGenerator<?> chunkgenerator, DefinedStructureManager definedstructuremanager) {
+		BetaPlusPlugin.LOGGER.log(Level.INFO, "HERE");
+		Iterator iterator = WorldGenerator.aP.values().iterator();
+
+		while(iterator.hasNext()) {
+			// chunkgenerator.getWorldChunkManager() = biomeProviderS
+			StructureGenerator<?> structuregenerator = (StructureGenerator)iterator.next();
+			if (biomeProviderS.a(structuregenerator)) {
+				SeededRandom seededrandom = new SeededRandom();
+				ChunkCoordIntPair chunkcoordintpair = ichunkaccess.getPos();
+				StructureStart structurestart = StructureStart.a;
+				if (structuregenerator == WorldGenerator.STRONGHOLD) {
+					synchronized(structuregenerator) {
+						if (structuregenerator.a(chunkgenerator, seededrandom, chunkcoordintpair.x, chunkcoordintpair.z)) {
+							BiomeBase biomebase = biomeProviderS.getBiome(new BlockPosition(chunkcoordintpair.d() + 9, 0, chunkcoordintpair.e() + 9));
+							StructureStart structurestart1 = structuregenerator.a().create(structuregenerator, chunkcoordintpair.x, chunkcoordintpair.z, biomebase, StructureBoundingBox.a(), 0, chunkgenerator.getSeed());
+							structurestart1.a(this, definedstructuremanager, chunkcoordintpair.x, chunkcoordintpair.z, biomebase);
+							structurestart = structurestart1.e() ? structurestart1 : StructureStart.a;
+						}
+					}
+				} else if (structuregenerator.a(chunkgenerator, seededrandom, chunkcoordintpair.x, chunkcoordintpair.z)) {
+					BiomeBase biomebase = biomeProviderS.getBiome(new BlockPosition(chunkcoordintpair.d() + 9, 0, chunkcoordintpair.e() + 9));
+					StructureStart structurestart1 = structuregenerator.a().create(structuregenerator, chunkcoordintpair.x, chunkcoordintpair.z, biomebase, StructureBoundingBox.a(), 0, chunkgenerator.getSeed());
+					structurestart1.a(this, definedstructuremanager, chunkcoordintpair.x, chunkcoordintpair.z, biomebase);
+					structurestart = structurestart1.e() ? structurestart1 : StructureStart.a;
+				}
+
+				ichunkaccess.a(structuregenerator.b(), structurestart);
+			}
+		}
+
 	}
 
 	private void setBlocksInChunk(IChunkAccess chunk)

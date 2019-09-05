@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 
 import static com.mrburgerus.betaplus.world.beta.beta_api.BetaPlusTerrainGenerator.CHUNK_SIZE;
 
@@ -52,6 +53,8 @@ public class WorldChunkManagerOverworldBeta extends WorldChunkManagerOverworld
 
 		voronoi = new VoronoiNoiseGenerator(seed, (short) 0);
 		biomeNoise = new PerlinNoise(seed);
+		//com.mrburgerus.betaplus.newP.BetaPlusPlugin.LOGGER.log(Level.INFO, "CALLED CONSTRUCT");
+
 	}
 
 
@@ -72,13 +75,15 @@ public class WorldChunkManagerOverworldBeta extends WorldChunkManagerOverworld
 	@Override
 	public Set<BiomeBase> a(int centerX, int centerZ, int sideLength)
 	{
+		com.mrburgerus.betaplus.newP.BetaPlusPlugin.LOGGER.log(Level.INFO, "CALLED");
 		int startX = centerX - sideLength >> 2;
 		int startZ = centerZ - sideLength >> 2;
 		int endX = centerX + sideLength >> 2;
 		int endZ = centerZ + sideLength >> 2;
 		Set<BiomeBase> set = Sets.newHashSet();
 		Collections.addAll(set, this.generateBiomes(centerX, centerZ, sideLength, sideLength, true));
-		return set;	}
+		return set;
+	}
 
 	@Nullable
 	@Override
