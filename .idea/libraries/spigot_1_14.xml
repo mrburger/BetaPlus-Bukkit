@@ -2,12 +2,10 @@
   <library name="spigot-1.14">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/../Bukkit src/1.14.4/spigot-1.14.4.jar!/" />
-      <root url="jar://$PROJECT_DIR$/../Bukkit src/1.14.4/WorldGeneratorApi-0.3.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="file://$PROJECT_DIR$/../Bukkit src" />
-      <root url="jar://$PROJECT_DIR$/../Bukkit src/1.14.4/spigot-1.14.4.jar!/" />
     </SOURCES>
   </library>
 </component>
