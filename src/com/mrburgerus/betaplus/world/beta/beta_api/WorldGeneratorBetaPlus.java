@@ -58,7 +58,7 @@ public class WorldGeneratorBetaPlus implements WorldGenerator
 			return injected.getBiomeGenerator();
 		} else {
 			WorldChunkManager worldChunkManager = this.getWorldHandle().getChunkProvider().getChunkGenerator().getWorldChunkManager();
-			//return new BiomeGeneratorImpl(worldChunkManager);
+			//return newP BiomeGeneratorImpl(worldChunkManager);
 			return new BetaPlusBiomeGenerator(this.getWorld().getSeed());
 		}
 	}

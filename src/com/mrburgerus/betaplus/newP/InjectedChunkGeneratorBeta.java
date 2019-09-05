@@ -1,18 +1,15 @@
-package com.mrburgerus.betaplus.world.beta.beta_new;
+package com.mrburgerus.betaplus.newP;
 
 import com.mrburgerus.betaplus.BetaPlusInjectPlugin;
-import com.mrburgerus.betaplus.util.BiomeReplaceUtil;
 import com.mrburgerus.betaplus.util.DeepenOceanUtil;
+import com.mrburgerus.betaplus.world.beta.beta_new.WorldChunkManagerOverworldBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_14_R1.*;
-import nl.rutgerkok.worldgeneratorapi.BaseTerrainGenerator;
 import nl.rutgerkok.worldgeneratorapi.internal.WorldDecoratorImpl;
-import org.bukkit.World;
 
 import java.util.Random;
-import java.util.logging.Level;
 
-public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkGeneratorAbstract<GeneratorSettingsDefault>
+public class InjectedChunkGeneratorBeta extends ChunkGeneratorAbstract<GeneratorSettingsDefault>
 {
 	private final World world;
 	private final MobSpawnerPhantom phantomSpawner = new MobSpawnerPhantom();
@@ -47,10 +44,10 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 	//private final BetaPlusGenSettings settings;
 	public static final int CHUNK_SIZE = 16;
 
-	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world, WorldChunkManagerOverworldBeta wcm)
+	public InjectedChunkGeneratorBeta(World world, WorldChunkManagerOverworldBeta wcm)
 	{
 		super(world, wcm, 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
-		this.world = world.getWorld();
+		this.world = world;
 
 		long seed  = world.getSeed();
 		rand = new Random(seed);
@@ -151,6 +148,28 @@ public class ChunkGeneratorBetaPlus extends net.minecraft.server.v1_14_R1.ChunkG
 	protected void a(double[] doubles, int i, int i1)
 	{
 
+	}
+
+	@Override
+	public void addDecorations(RegionLimitedWorldAccess populationArea) {
+		this.worldDecorator.spawnDecorations(this, populationArea);
+	}
+
+	@Override
+	public void addMobs(RegionLimitedWorldAccess regionlimitedworldaccess) {
+		int i = regionlimitedworldaccess.a();
+		int j = regionlimitedworldaccess.b();
+		BiomeBase biomebase = regionlimitedworldaccess.getChunkAt(i, j).getBiomeIndex()[0];
+		SeededRandom seededrandom = new SeededRandom();
+		seededrandom.a(regionlimitedworldaccess.getSeed(), i << 4, j << 4);
+		SpawnerCreature.a(regionlimitedworldaccess, biomebase, i, j, seededrandom);
+	}
+
+	@Override
+	public void doMobSpawning(WorldServer worldserver, boolean flag, boolean flag1) {
+		this.phantomSpawner.a(worldserver, flag, flag1);
+		this.patrolSpawner.a(worldserver, flag, flag1);
+		this.catSpawner.a(worldserver, flag, flag1);
 	}
 
 	private void setBlocksInChunk(IChunkAccess chunk)

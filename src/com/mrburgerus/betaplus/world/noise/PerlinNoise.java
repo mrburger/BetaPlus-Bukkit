@@ -65,7 +65,7 @@ public class PerlinNoise
 
 
 	/**
-	 * Create a new noise creator with the default seed value
+	 * Create a newP noise creator with the default seed value
 	 */
 	public PerlinNoise()
 	{
@@ -73,7 +73,7 @@ public class PerlinNoise
 	}
 
 	/**
-	 * Create a new noise creator with the given seed value for the randomness
+	 * Create a newP noise creator with the given seed value for the randomness
 	 *
 	 * @param seed The seed value to use
 	 */
@@ -512,7 +512,7 @@ public class PerlinNoise
 	}
 
 	/**
-	 * Fade curve calculation which is 6t^5 - 15t^4 + 10t^3. This is the new
+	 * Fade curve calculation which is 6t^5 - 15t^4 + 10t^3. This is the newP
 	 * algorithm, where the old one used to be 3t^2 - 2t^3.
 	 *
 	 * @param t The t parameter to calculate the fade for

@@ -162,15 +162,15 @@ public class BetaPlusInjectPlugin extends JavaPlugin implements Listener
 				//biomeProviderField.set(worldServer.getChunkProvider().chunkGenerator.getWorldChunkManager(), wcm);
 				//biomeProviderField.set(chunkProvider.chunkGenerator.getWorldChunkManager(), wcm);
 				//biomeProviderField.set(WorldChunkManager, wcm);
-				//biomeProviderField.set(new WorldChunkManagerBetaPlus(worldServer.getSeed()), wcm);
+				//biomeProviderField.set(newP WorldChunkManagerBetaPlus(worldServer.getSeed()), wcm);
 
 				// was wcm.
 				//final Object oldValue = biomeProviderField.get(Class.forName("WorldChunkManager"));
 
 				// Gets the object in type inside parentheses.
 				final Object oldValue = (WorldChunkManager) chunkProvider.chunkGenerator.getWorldChunkManager();
-						//biomeProviderField.get(new WorldChunkManagerBetaPlus(worldServer.getSeed()))
-						// biomeProviderField.get(new Object())
+						//biomeProviderField.get(newP WorldChunkManagerBetaPlus(worldServer.getSeed()))
+						// biomeProviderField.get(newP Object())
 						//biomeProviderField.getType()
 						;
 				biomeProviderField.set(oldValue, wcm);

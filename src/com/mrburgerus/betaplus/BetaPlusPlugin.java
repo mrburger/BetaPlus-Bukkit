@@ -65,7 +65,7 @@ public class BetaPlusPlugin extends JavaPlugin implements WorldGeneratorApi, Lis
 	@Override
 	public ChunkGenerator getDefaultWorldGenerator(String worldName, String id)
 	{
-		//return new BetaChunkGenerator(this);
+		//return newP BetaChunkGenerator(this);
 
 		return WorldGeneratorBetaPlus.getInstance(this, 0, 3).createCustomGenerator(WorldRef.ofName(worldName), generator ->
 			{
@@ -79,7 +79,7 @@ public class BetaPlusPlugin extends JavaPlugin implements WorldGeneratorApi, Lis
 
 	public ChunkGenerator createCustomGenerator(WorldRef world, Consumer<WorldGenerator> consumer) {
 		this.worldGeneratorModifiers.putIfAbsent(world, consumer);
-		//return new DummyBukkitChunkGenerator(WorldGeneratorBetaPlus.getInstance(this, 0, 3));
+		//return newP DummyBukkitChunkGenerator(WorldGeneratorBetaPlus.getInstance(this, 0, 3));
 		return new DummyBukkitChunkGenerator(this);
 	}
 

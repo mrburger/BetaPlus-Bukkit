@@ -196,7 +196,7 @@ public class BetaPlusBiomeGenerator implements BiomeGenerator
 			for (int zChunk = 0; zChunk < zChunkSize; zChunk++)
 			{
 				// Looks to be incorrect.
-				//ChunkPos chunkPos = new ChunkPos(startX + (xChunk * CHUNK_SIZE), startZ + (zChunk * CHUNK_SIZE));
+				//ChunkPos chunkPos = newP ChunkPos(startX + (xChunk * CHUNK_SIZE), startZ + (zChunk * CHUNK_SIZE));
 				ChunkCoordIntPair chunkPos = new ChunkCoordIntPair(new BlockPosition(startX + (xChunk * CHUNK_SIZE), 0, startZ + (zChunk * CHUNK_SIZE)));
 
 				// Get simulated chunk

@@ -30,7 +30,7 @@ public class BetaChunkGenerator extends ChunkGenerator
 
 	public void onInitialize(World _world)
 	{
-		this.chunkGenerator = new BetaPlusChunkGenerator(_world);
+		this.chunkGenerator = newP BetaPlusChunkGenerator(_world);
 	}
 
 	@Override
@@ -39,8 +39,8 @@ public class BetaChunkGenerator extends ChunkGenerator
 		ChunkData data = createChunkData(world);
 
 		// Create a ChunkPos (forge name)
-		ChunkCoordIntPair chunkPos = new ChunkCoordIntPair(x, z);
-		BukkitChunkBuffer buffer = new BukkitChunkBuffer(chunkPos, data);
+		ChunkCoordIntPair chunkPos = newP ChunkCoordIntPair(x, z);
+		BukkitChunkBuffer buffer = newP BukkitChunkBuffer(chunkPos, data);
 		this.chunkGenerator.generate(buffer);
 
 		return data;

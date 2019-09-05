@@ -33,7 +33,7 @@ public class BukkitChunkBuffer
 
 	public BlockData getBlock(int x, int y, int z)
 	{
-		return chunkData.getBlockData(x, y, z); //((Block.a(world, new BlockPosition(x, y, z))).getNMS().getBlock();
+		return chunkData.getBlockData(x, y, z); //((Block.a(world, newP BlockPosition(x, y, z))).getNMS().getBlock();
 		//return chunkData.getBlockData(x, y, z);
 	}
 }

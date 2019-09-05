@@ -106,7 +106,7 @@ public abstract class AbstractWorldSimulator
 				for (int zChunk = ChunkCoordIntPairForUse.z - size; zChunk <= ChunkCoordIntPairForUse.z + size; ++zChunk)
 				{
 					Pair<Integer, Boolean> posPair = getSimulatedAvg(new ChunkCoordIntPair(xChunk, zChunk));
-					//BetaPlus.LOGGER.info("Pos: " + new ChunkCoordIntPair(xChunk, zChunk) + " ; " + posPair.getFirst());
+					//BetaPlus.LOGGER.info("Pos: " + newP ChunkCoordIntPair(xChunk, zChunk) + " ; " + posPair.getFirst());
 					sum += posPair.getFirst();
 					if (posPair.getSecond())
 					{
