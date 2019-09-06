@@ -5,6 +5,7 @@ import com.mrburgerus.betaplus.bukkit.DummyBukkitChunkGenerator;
 import com.mrburgerus.betaplus.world.beta.ChunkGeneratorBetaPlus;
 import com.mrburgerus.betaplus.world.beta.WorldChunkManagerBeta;
 import net.minecraft.server.v1_14_R1.*;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.event.EventHandler;
@@ -42,6 +43,10 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 	public void onEnable()
 	{
 		super.onEnable();
+		for (World world : Bukkit.getWorlds())
+		{
+			//worldGenerators.put(world.getName(), "NO");
+		}
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
 
@@ -69,10 +74,14 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 	public void getForWorld(World world)
 	{
 		//if(worldGenerators.get(world.getUID()).equals(KEYWORD))
-		if (worldGenerators.get(world.getName()).equals(KEYWORD))
+		if (worldGenerators.get(world.getName()) != null && worldGenerators.get(world.getName()).equals(KEYWORD))
 		{
 			WorldServer serverWorld = ((CraftWorld) world).getHandle();
 			this.replaceChunkGenerator(serverWorld);
+		}
+		else
+		{
+			LOGGER.log(Level.INFO, "Not a Beta+ World");
 		}
 	}
 

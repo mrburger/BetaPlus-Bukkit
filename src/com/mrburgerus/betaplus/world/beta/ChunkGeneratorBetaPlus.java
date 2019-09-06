@@ -63,7 +63,7 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		//BetaPlusPlugin.LOGGER.log(Level.INFO, "YES HERE");
 	}
 
-	
+
 
 	@Override
 	public void buildBase(IChunkAccess chunkIn)
@@ -82,7 +82,10 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		DeepenOceanUtil.deepenOcean(chunkIn, rand, BetaPlusPlugin.seaLevel,7, BetaPlusPlugin.oceanYScale);
 
 		// Replace Blocks (DIRT & SAND & STUFF) SEE ABOVE
-		replaceBlocksForBiome(x, z, chunkIn, chunkIn.getBiomeIndex());
+		replaceBlocksForBiome(x, z, chunkIn, biomesForGeneration);
+		// Rotate 270
+		chunkIn.a(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration))));
+
 	}
 
 	@Override

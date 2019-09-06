@@ -6,6 +6,7 @@ import com.mrburgerus.betaplus.BetaPlusPlugin;
 import com.mrburgerus.betaplus.util.TerrainType;
 import com.mrburgerus.betaplus.world.beta.select.AbstractBiomeSelector;
 import com.mrburgerus.betaplus.world.beta.select.BetaPlusBiomeSelector;
+import com.mrburgerus.betaplus.world.beta.select.BiomeSelectorBetaPlus;
 import com.mrburgerus.betaplus.world.beta.sim.BetaPlusSimulator;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBiome;
 import com.mrburgerus.betaplus.world.noise.PerlinNoise;
@@ -49,6 +50,7 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 
 		this.simulator = new BetaPlusSimulator(seed, this);
 		selector = new BetaPlusBiomeSelector();
+		//selector = new BiomeSelectorBetaPlus();
 
 		voronoi = new VoronoiNoiseGenerator(seed, (short) 0);
 		biomeNoise = new PerlinNoise(seed);
