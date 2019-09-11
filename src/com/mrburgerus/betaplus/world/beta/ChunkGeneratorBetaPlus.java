@@ -7,15 +7,17 @@ import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.World;
 
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 
 public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSettingsDefault>
 {
-	private final World world;
 	private final MobSpawnerPhantom phantomSpawner = new MobSpawnerPhantom();
 	private final MobSpawnerPatrol patrolSpawner = new MobSpawnerPatrol();
 	private final MobSpawnerCat catSpawner = new MobSpawnerCat();
+	private final VillageSiege siegeSpawner = new VillageSiege();
+
 
 	private Random rand;
 	private BiomeBase[] biomesForGeneration;
@@ -48,7 +50,6 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world, WorldChunkManagerBeta wcm)
 	{
 		super(world, wcm, 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
-		this.world = world.getWorld();
 
 		long seed  = world.getSeed();
 		rand = new Random(seed);
@@ -63,7 +64,50 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		//BetaPlusPlugin.LOGGER.log(Level.INFO, "YES HERE");
 	}
 
+	// Added to fix passive mobs
+	@Override
+	public void addMobs(RegionLimitedWorldAccess regionlimitedworldaccess)
+	{
+		int i = regionlimitedworldaccess.a();
+		int j = regionlimitedworldaccess.b();
+		BiomeBase biomebase = regionlimitedworldaccess.getChunkAt(i, j).getBiomeIndex()[0];
+		SeededRandom seededrandom = new SeededRandom();
+		seededrandom.a(regionlimitedworldaccess.getSeed(), i << 4, j << 4);
+		SpawnerCreature.a(regionlimitedworldaccess, biomebase, i, j, seededrandom);
+	}
 
+	@Override
+	public List<BiomeBase.BiomeMeta> getMobsFor(EnumCreatureType enumcreaturetype, BlockPosition blockposition)
+	{
+		if (WorldGenerator.SWAMP_HUT.c(this.a, blockposition)) {
+			if (enumcreaturetype == EnumCreatureType.MONSTER) {
+				return WorldGenerator.SWAMP_HUT.e();
+			}
+
+			if (enumcreaturetype == EnumCreatureType.CREATURE) {
+				return WorldGenerator.SWAMP_HUT.f();
+			}
+		} else if (enumcreaturetype == EnumCreatureType.MONSTER) {
+			if (WorldGenerator.PILLAGER_OUTPOST.a(this.a, blockposition)) {
+				return WorldGenerator.PILLAGER_OUTPOST.e();
+			}
+
+			if (WorldGenerator.OCEAN_MONUMENT.a(this.a, blockposition)) {
+				return WorldGenerator.OCEAN_MONUMENT.e();
+			}
+		}
+
+		return super.getMobsFor(enumcreaturetype, blockposition);
+	}
+
+	// Fixes other mobs, like pillagers
+	public void doMobSpawning(WorldServer worldserver, boolean flag, boolean flag1)
+	{
+		this.phantomSpawner.a(worldserver, flag, flag1);
+		this.patrolSpawner.a(worldserver, flag, flag1);
+		this.catSpawner.a(worldserver, flag, flag1);
+		this.siegeSpawner.a(worldserver, flag, flag1);
+	}
 
 	@Override
 	public void buildBase(IChunkAccess chunkIn)

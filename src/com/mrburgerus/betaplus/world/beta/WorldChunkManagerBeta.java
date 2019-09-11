@@ -14,10 +14,7 @@ import com.mrburgerus.betaplus.world.noise.VoronoiNoiseGenerator;
 import net.minecraft.server.v1_14_R1.*;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 
 import static com.mrburgerus.betaplus.world.beta.ChunkGeneratorBetaPlus.CHUNK_SIZE;
@@ -38,6 +35,9 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 	public final double scaleVal;
 	public final double mult;
 	private double offsetVoronoi = 1024;
+
+	// BIOME CACHE
+	//protected HashMap<ChunkCoordIntPair, >
 
 	public WorldChunkManagerBeta(World world)
 	{
@@ -132,7 +132,8 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 	@Override
 	public BiomeBase[] getBiomeBlock(int x, int z, int xSize, int zSize)
 	{
-		return this.generateBiomes(x, z, xSize, zSize, true);
+		// Modified
+		return this.a(x, z, xSize, zSize, true);
 	}
 
 	@Override

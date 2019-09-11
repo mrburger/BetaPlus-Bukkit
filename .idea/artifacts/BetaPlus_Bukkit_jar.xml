@@ -3,7 +3,6 @@
     <output-path>$PROJECT_DIR$/Test Server/plugins/</output-path>
     <root id="archive" name="BetaPlus-Bukkit.jar">
       <element id="module-output" name="BetaPlus-Bukkit" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../Bukkit src/1.14.4/spigot-1.14.4.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

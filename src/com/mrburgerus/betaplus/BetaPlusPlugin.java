@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Must implement WorldGeneratorApi, as it is not independent
 public class BetaPlusPlugin extends JavaPlugin implements Listener
 {
 	public static Logger LOGGER;
@@ -43,24 +42,12 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 	public void onEnable()
 	{
 		super.onEnable();
-		for (World world : Bukkit.getWorlds())
-		{
-			//worldGenerators.put(world.getName(), "NO");
-		}
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
 
 	@Override
 	public org.bukkit.generator.ChunkGenerator getDefaultWorldGenerator(String worldName, String id)
 	{
-		/*
-		World world = Bukkit.getWorld(worldName);
-
-		if (world != null)
-		{
-			this.worldGenerators.put(world.getUID(), KEYWORD);
-		}
-		*/
 		this.worldGenerators.put(worldName, KEYWORD);
 		return new DummyBukkitChunkGenerator(this);
 	}
