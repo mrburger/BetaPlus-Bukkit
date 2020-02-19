@@ -3,8 +3,9 @@ package com.mrburgerus.betaplus.util;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mrburgerus.betaplus.BetaPlusPlugin;
-import net.minecraft.server.v1_14_R1.BlockPosition;
-import net.minecraft.server.v1_14_R1.MathHelper;
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.MathHelper;
+
 
 import java.util.Arrays;
 import java.util.List;

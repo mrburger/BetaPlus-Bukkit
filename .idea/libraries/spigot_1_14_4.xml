@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="spigot 1.14.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../1.14/BetaPlus-Bukkit/server.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../1.14/BetaPlus-Bukkit/server.jar!/" />
+    </SOURCES>
+  </library>
+</component>

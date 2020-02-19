@@ -4,8 +4,7 @@ import com.mrburgerus.betaplus.BetaPlusPlugin;
 import com.mrburgerus.betaplus.util.BiomeReplaceUtil;
 import com.mrburgerus.betaplus.util.DeepenOceanUtil;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
-import net.minecraft.server.v1_14_R1.*;
-import org.bukkit.World;
+import net.minecraft.server.v1_15_R1.*;
 
 import java.util.List;
 import java.util.Random;
@@ -47,7 +46,7 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 	//private final BetaPlusGenSettings settings;
 	public static final int CHUNK_SIZE = 16;
 
-	public ChunkGeneratorBetaPlus(net.minecraft.server.v1_14_R1.World world, WorldChunkManagerBeta wcm)
+	public ChunkGeneratorBetaPlus(WorldServer world, WorldChunkManagerBeta wcm)
 	{
 		super(world, wcm, 4, 8, 256, world.getChunkProvider().getChunkGenerator().getSettings(), true);
 
@@ -70,7 +69,7 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 	{
 		int i = regionlimitedworldaccess.a();
 		int j = regionlimitedworldaccess.b();
-		BiomeBase biomebase = regionlimitedworldaccess.getChunkAt(i, j).getBiomeIndex()[0];
+		BiomeBase biomebase = regionlimitedworldaccess.getChunkAt(i, j).getBiomeIndex().getBiome(i, j,0);
 		SeededRandom seededrandom = new SeededRandom();
 		seededrandom.a(regionlimitedworldaccess.getSeed(), i << 4, j << 4);
 		SpawnerCreature.a(regionlimitedworldaccess, biomebase, i, j, seededrandom);
@@ -109,7 +108,33 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		this.siegeSpawner.a(worldserver, flag, flag1);
 	}
 
+
 	@Override
+	public void buildBase(RegionLimitedWorldAccess regionlimitedworldaccess, IChunkAccess chunkIn)
+	{
+		// Get Position
+		int x = chunkIn.getPos().x;
+		int z = chunkIn.getPos().z;
+		// Functions As setBaseChunkSeed(), but broken down.
+		rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
+
+		biomesForGeneration = biomeProviderS.a(x * 16, z * 16, 16, 16, false);
+		// Similar to ChunkGeneratorOverworld
+		// Written similarly to "generateTerrain" from earlier versions.
+		setBlocksInChunk(chunkIn);
+		// Scale factor formerly 2.85
+		DeepenOceanUtil.deepenOcean(chunkIn, rand, BetaPlusPlugin.seaLevel,7, BetaPlusPlugin.oceanYScale);
+
+		// Replace Blocks (DIRT & SAND & STUFF) SEE ABOVE
+		replaceBlocksForBiome(x, z, chunkIn, biomesForGeneration);
+		// Rotate 270
+		//chunkIn.a(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration))));
+
+		// Fill biomes
+		BiomeStorage storedPoints = new BiomeStorage(biomesForGeneration);
+		regionlimitedworldaccess.bio
+	}
+
 	public void buildBase(IChunkAccess chunkIn)
 	{
 		// Get Position

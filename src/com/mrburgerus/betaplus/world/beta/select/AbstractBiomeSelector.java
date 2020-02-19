@@ -1,7 +1,7 @@
 package com.mrburgerus.betaplus.world.beta.select;
 
 import com.mrburgerus.betaplus.util.TerrainType;
-import net.minecraft.server.v1_14_R1.BiomeBase;
+import net.minecraft.server.v1_15_R1.BiomeBase;
 
 import java.util.List;
 

@@ -4,10 +4,11 @@ import com.mrburgerus.betaplus.api.ReflectionUtil;
 import com.mrburgerus.betaplus.bukkit.DummyBukkitChunkGenerator;
 import com.mrburgerus.betaplus.world.beta.ChunkGeneratorBetaPlus;
 import com.mrburgerus.betaplus.world.beta.WorldChunkManagerBeta;
-import net.minecraft.server.v1_14_R1.*;
-import org.bukkit.Bukkit;
+import net.minecraft.server.v1_15_R1.ChunkGenerator;
+import net.minecraft.server.v1_15_R1.ChunkProviderServer;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldInitEvent;
@@ -89,7 +90,7 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 			Field chunkGeneratorField = ReflectionUtil.getFieldOfType(chunkProvider, ChunkGenerator.class);
 			chunkGeneratorField.set(chunkProvider, injected);
 			chunkGeneratorField = ReflectionUtil.getFieldOfType(chunkProvider.playerChunkMap, ChunkGenerator.class);
-			chunkGeneratorField.set(chunkProvider.playerChunkMap, injected);
+			chunkGeneratorField.set(((ChunkProviderServer) chunkProvider).playerChunkMap, injected);
 
 			try
 			{

@@ -2,8 +2,8 @@ package com.mrburgerus.betaplus.util;
 
 import com.mojang.datafixers.util.Pair;
 import com.mrburgerus.betaplus.world.noise.AbstractOctavesGenerator;
-import net.minecraft.server.v1_14_R1.BlockPosition;
-import net.minecraft.server.v1_14_R1.ChunkCoordIntPair;
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.ChunkCoordIntPair;
 
 import java.util.HashMap;
 import java.util.Random;

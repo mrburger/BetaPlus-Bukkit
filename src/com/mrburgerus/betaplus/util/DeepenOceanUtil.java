@@ -1,8 +1,9 @@
 package com.mrburgerus.betaplus.util;
 
-import net.minecraft.server.v1_14_R1.BlockPosition;
-import net.minecraft.server.v1_14_R1.Blocks;
-import net.minecraft.server.v1_14_R1.IChunkAccess;
+
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.Blocks;
+import net.minecraft.server.v1_15_R1.IChunkAccess;
 
 import java.util.Random;
 
