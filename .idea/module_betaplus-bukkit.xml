@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_betaplus-bukkit" default="compile.module.betaplus-bukkit">
+  <dirname property="module.betaplus-bukkit.basedir" file="${ant.file.module_betaplus-bukkit}"/>
+  
+  <property name="module.jdk.home.betaplus-bukkit" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.betaplus-bukkit" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.betaplus-bukkit" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.betaplus-bukkit" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="betaplus-bukkit.output.dir" value="${module.betaplus-bukkit.basedir}/../Test Server/plugins/production/BetaPlus-Bukkit"/>
+  <property name="betaplus-bukkit.testoutput.dir" value="${module.betaplus-bukkit.basedir}/../Test Server/plugins/test/BetaPlus-Bukkit"/>
+  
+  <path id="betaplus-bukkit.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="betaplus-bukkit.module.production.classpath">
+    <path refid="${module.jdk.classpath.betaplus-bukkit}"/>
+    <path refid="library.spigot-1.15.2.classpath"/>
+  </path>
+  
+  <path id="betaplus-bukkit.runtime.production.module.classpath">
+    <pathelement location="${betaplus-bukkit.output.dir}"/>
+    <path refid="library.spigot-1.15.2.classpath"/>
+  </path>
+  
+  <path id="betaplus-bukkit.module.classpath">
+    <path refid="${module.jdk.classpath.betaplus-bukkit}"/>
+    <pathelement location="${betaplus-bukkit.output.dir}"/>
+    <path refid="library.spigot-1.15.2.classpath"/>
+  </path>
+  
+  <path id="betaplus-bukkit.runtime.module.classpath">
+    <pathelement location="${betaplus-bukkit.testoutput.dir}"/>
+    <pathelement location="${betaplus-bukkit.output.dir}"/>
+    <path refid="library.spigot-1.15.2.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.betaplus-bukkit">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.betaplus-bukkit">
+    <patternset refid="excluded.from.module.betaplus-bukkit"/>
+  </patternset>
+  
+  <path id="betaplus-bukkit.module.sourcepath">
+    <dirset dir="${module.betaplus-bukkit.basedir}/../../BetaPlus-Bukkit">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.betaplus-bukkit" depends="compile.module.betaplus-bukkit.production,compile.module.betaplus-bukkit.tests" description="Compile module BetaPlus-Bukkit"/>
+  
+  <target name="compile.module.betaplus-bukkit.production" depends="register.custom.compilers" description="Compile module BetaPlus-Bukkit; production classes">
+    <mkdir dir="${betaplus-bukkit.output.dir}"/>
+    <javac2 destdir="${betaplus-bukkit.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.betaplus-bukkit}/javac">
+      <compilerarg line="${compiler.args.betaplus-bukkit}"/>
+      <bootclasspath refid="betaplus-bukkit.module.bootclasspath"/>
+      <classpath refid="betaplus-bukkit.module.production.classpath"/>
+      <src refid="betaplus-bukkit.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.betaplus-bukkit"/>
+    </javac2>
+    
+    <copy todir="${betaplus-bukkit.output.dir}">
+      <fileset dir="${module.betaplus-bukkit.basedir}/../src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.betaplus-bukkit.tests" depends="register.custom.compilers,compile.module.betaplus-bukkit.production" description="compile module BetaPlus-Bukkit; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.betaplus-bukkit" description="cleanup module">
+    <delete dir="${betaplus-bukkit.output.dir}"/>
+    <delete dir="${betaplus-bukkit.testoutput.dir}"/>
+  </target>
+</project>

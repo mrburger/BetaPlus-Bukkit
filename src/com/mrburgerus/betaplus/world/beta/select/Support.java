@@ -2,8 +2,8 @@ package com.mrburgerus.betaplus.world.beta.select;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.server.v1_14_R1.BiomeBase;
-import net.minecraft.server.v1_14_R1.Biomes;
+import net.minecraft.server.v1_15_R1.BiomeBase;
+import net.minecraft.server.v1_15_R1.Biomes;
 
 import java.util.List;
 import java.util.Optional;

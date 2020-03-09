@@ -3,8 +3,8 @@ package com.mrburgerus.betaplus.world.beta.select;
 
 import com.mojang.datafixers.util.Pair;
 import com.mrburgerus.betaplus.util.TerrainType;
-import net.minecraft.server.v1_14_R1.BiomeBase;
-import net.minecraft.server.v1_14_R1.Biomes;
+import net.minecraft.server.v1_15_R1.BiomeBase;
+import net.minecraft.server.v1_15_R1.Biomes;
 
 import java.util.Optional;
 

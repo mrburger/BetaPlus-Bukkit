@@ -64,12 +64,14 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 		//if(worldGenerators.get(world.getUID()).equals(KEYWORD))
 		if (worldGenerators.get(world.getName()) != null && worldGenerators.get(world.getName()).equals(KEYWORD))
 		{
+			//LOGGER.log(Level.INFO, "Attempting to create");
 			WorldServer serverWorld = ((CraftWorld) world).getHandle();
 			this.replaceChunkGenerator(serverWorld);
+			//LOGGER.log(Level.INFO, "Finished Replacement");
 		}
 		else
 		{
-			LOGGER.log(Level.INFO, "Not a Beta+ World");
+			LOGGER.log(Level.INFO, "Not a Beta+ World :(");
 		}
 	}
 
@@ -106,6 +108,7 @@ public class BetaPlusPlugin extends JavaPlugin implements Listener
 
 			this.injected = injected;
 			// Why this?
+			// Removed
 			worldServer.generator = null;
 		}
 		catch (ReflectiveOperationException var8)

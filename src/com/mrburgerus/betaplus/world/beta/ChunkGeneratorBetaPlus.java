@@ -1,7 +1,6 @@
 package com.mrburgerus.betaplus.world.beta;
 
 import com.mrburgerus.betaplus.BetaPlusPlugin;
-import com.mrburgerus.betaplus.util.BiomeReplaceUtil;
 import com.mrburgerus.betaplus.util.DeepenOceanUtil;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import net.minecraft.server.v1_15_R1.*;
@@ -60,7 +59,7 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		scaleNoise = new NoiseGeneratorOctavesBeta(rand, 10);
 		octaves7 = new NoiseGeneratorOctavesBeta(rand, 16);
 		biomeProviderS = wcm;
-		//BetaPlusPlugin.LOGGER.log(Level.INFO, "YES HERE");
+		//BetaPlusPlugin.LOGGER.log(Level.INFO, "YES HERE IN THE CHUNK GEN");
 	}
 
 	// Added to fix passive mobs
@@ -132,7 +131,19 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 
 		// Fill biomes
 		BiomeStorage storedPoints = new BiomeStorage(biomesForGeneration);
-		regionlimitedworldaccess.bio
+		for (int i = 0; i < CHUNK_SIZE; i++)
+		{
+			for (int j = 0; j < CHUNK_SIZE; j++)
+			{
+				for (int y = 0; y < 256; y++)
+				{
+					// Bit shift MAGIC from forge
+					chunkIn.getBiomeIndex().setBiome(i, y, j, biomesForGeneration[(i & 15) << 4 | i >> 4 & 15]);
+				}
+			}
+		}
+
+
 	}
 
 	public void buildBase(IChunkAccess chunkIn)
@@ -153,7 +164,8 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 		// Replace Blocks (DIRT & SAND & STUFF) SEE ABOVE
 		replaceBlocksForBiome(x, z, chunkIn, biomesForGeneration);
 		// Rotate 270
-		chunkIn.a(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration))));
+		//chunkIn.a(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(BiomeReplaceUtil.convertBiomeArray(biomesForGeneration))));
+		//((Chunk) chunkIn).
 
 	}
 
@@ -375,8 +387,9 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 				int stoneN = (int) (this.stoneNoise[z + x * 16] / 3.0 + 3.0 + this.rand.nextDouble() * 0.25);
 				int checkVal = -1;
 				// Changed to use the actual Biome Config.
-				IBlockData topBlock = biome.q().a();
-				IBlockData fillerBlock = biome.q().b();
+				// Testing
+				IBlockData topBlock = biome.r().a().a();
+				IBlockData fillerBlock = biome.r().a().b();
 
 				// GO from Top to bottom of world
 				for (int y = 127; y >= 0; --y)
@@ -407,8 +420,8 @@ public class ChunkGeneratorBetaPlus extends ChunkGeneratorAbstract<GeneratorSett
 							}
 							else if (y >= BetaPlusPlugin.seaLevel - 4 && y <= BetaPlusPlugin.seaLevel + 1)
 							{
-								topBlock = biome.q().a();
-								fillerBlock = biome.q().b();
+								topBlock = biome.r().a().a();
+								fillerBlock = biome.r().a().b();
 								if (gravelN)
 								{
 									topBlock = Blocks.AIR.getBlockData();

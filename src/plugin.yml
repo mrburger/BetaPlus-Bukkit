@@ -1,6 +1,6 @@
 name: Beta_Plus
-version: 1.1
+version: 1.2
 author: mrburgerUS
 main: com.mrburgerus.betaplus.BetaPlusPlugin
-api-version: 1.14
+api-version: 1.15
 load: startup

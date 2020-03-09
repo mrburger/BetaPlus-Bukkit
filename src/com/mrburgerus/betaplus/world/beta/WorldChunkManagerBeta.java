@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 
 import static com.mrburgerus.betaplus.world.beta.ChunkGeneratorBetaPlus.CHUNK_SIZE;
 
@@ -44,6 +45,7 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 	public WorldChunkManagerBeta(World world)
 	{
 		super(biomeList);
+		//BetaPlusPlugin.LOGGER.log(Level.INFO, "Calling Provider");
 		long seed = world.getSeed();
 		scaleVal = (1.0D / 39.999999404);
 		mult = 2;
@@ -72,7 +74,8 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 		return this.generateBiomes(x, z, xSize, zSize, false);
 	}
 
-	public Set<BiomeBase> a(int centerX, int centerZ, int sideLength)
+	// Add centerY
+	public Set<BiomeBase> a(int centerX, int centerY, int centerZ, int sideLength)
 	{
 		int startX = centerX - sideLength >> 2;
 		int startZ = centerZ - sideLength >> 2;
@@ -278,9 +281,11 @@ public class WorldChunkManagerBeta extends WorldChunkManager
 		return terrainPairs;
 	}
 
+	// 1.15 makes this kinda nasty with 3D Biomes
 	@Override
-	public BiomeBase getBiome(int i, int i1, int i2) {
-		return null;
+	public BiomeBase getBiome(int x, int y, int z)
+	{
+		return this.getBiome(x, z);
 	}
 
 	static

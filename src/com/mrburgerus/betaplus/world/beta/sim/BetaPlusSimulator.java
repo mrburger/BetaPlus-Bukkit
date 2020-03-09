@@ -5,7 +5,7 @@ import com.mrburgerus.betaplus.util.AbstractWorldSimulator;
 import com.mrburgerus.betaplus.world.beta.WorldChunkManagerBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBeta;
 import com.mrburgerus.betaplus.world.noise.NoiseGeneratorOctavesBiome;
-import net.minecraft.server.v1_14_R1.ChunkCoordIntPair;
+import net.minecraft.server.v1_15_R1.ChunkCoordIntPair;
 
 import java.util.Random;
 
