@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 public class BetaPlusPlugin extends JavaPlugin implements Listener
 {
 	public static Logger LOGGER;
-	public static final int seaLevel = 63;
+	public static final int seaLevel = 64;
 	public static final int seaDepth = 20;
-	public static final double oceanYScale = 3.25;
+	public static final double oceanYScale = 2.7;
 	public static final String KEYWORD = "BETA_PLUS";
 	private ChunkGeneratorBetaPlus injected;
 

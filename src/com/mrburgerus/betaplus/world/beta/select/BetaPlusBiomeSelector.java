@@ -14,24 +14,24 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 	private static final BiomeBase tundra = Biomes.SNOWY_TUNDRA;
 	private static final BiomeBase savanna = Biomes.SAVANNA;
 	private static final BiomeBase desert = Biomes.DESERT;
-	private static final BiomeBase swampland = Biomes.SWAMP; // Modified
+	private static final BiomeBase swampland = Biomes.SAVANNA; // Modified
 	private static final BiomeBase taiga = Biomes.SNOWY_TAIGA;
 	private static final BiomeBase shrubland = Biomes.SAVANNA;
 	private static final BiomeBase plains = Biomes.PLAINS;
-	private static final BiomeBase seasonalForest = Biomes.BIRCH_FOREST;
-	private static final BiomeBase rainforest = Biomes.BAMBOO_JUNGLE;
+	private static final BiomeBase seasonalForest = Biomes.FOREST;
+	private static final BiomeBase rainforest = Biomes.FLOWER_FOREST;
 	private static final BiomeBase forest = Biomes.FOREST;
 	// Hill declarations
 	private static final BiomeBase tundraHills = Biomes.SNOWY_MOUNTAINS;
 	private static final BiomeBase savannaHills = Biomes.SAVANNA_PLATEAU;
 	private static final BiomeBase desertHills = Biomes.DESERT_HILLS;
 	// REPLACED because I HATE swamps
-	private static final BiomeBase swamplandHills = Biomes.DARK_FOREST_HILLS;
+	private static final BiomeBase swamplandHills = Biomes.SAVANNA_PLATEAU; // Changed to look better
 	private static final BiomeBase taigaHills = Biomes.SNOWY_TAIGA_HILLS;
 	private static final BiomeBase shrublandHills = Biomes.SAVANNA_PLATEAU;
-	private static final BiomeBase plainsHills = Biomes.FOREST; // The only Non-Beta Type. Confusing though because plains don't have hills.
-	private static final BiomeBase seasonalForestHills = Biomes.FLOWER_FOREST;
-	private static final BiomeBase rainforestHills = Biomes.BAMBOO_JUNGLE_HILLS;
+	private static final BiomeBase plainsHills = Biomes.PLAINS; // The only Non-Beta Type. Confusing though because plains don't have hills.
+	private static final BiomeBase seasonalForestHills = Biomes.FOREST;
+	private static final BiomeBase rainforestHills = Biomes.FOREST;
 	private static final BiomeBase forestHills = Biomes.FOREST;
 	// Ocean and other declarations
 	private static final BiomeBase ocean = Biomes.OCEAN;
@@ -68,7 +68,7 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 			case deepSea:
 				return getOceanBiome(temperature, humidity, true);
 			case coastal:
-				return beachBiome;
+				return temperature < 0.2f ? Biomes.SNOWY_BEACH : beachBiome;
 			case island:
 				return beachBiome; // Update later.
 			case generic:
@@ -81,17 +81,21 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 	// This Method is hella nasty.
 	private BiomeBase getOceanBiome(double temperature, double humidity, boolean isDeepOcean)
 	{
-		if (temperature < 0.1) // Frozen
+		if (temperature < 0.325) // Frozen (USE RIVERS FOR SHEETS)
 		{
-			return isDeepOcean ? Biomes.DEEP_FROZEN_OCEAN : Biomes.FROZEN_OCEAN;
+			return isDeepOcean ? Biomes.FROZEN_RIVER : Biomes.FROZEN_RIVER;
 		}
-		else if (temperature > 0.9) // Hot
+		else if (temperature > 0.95 && humidity > 0.95) // Hot
 		{
 			return isDeepOcean ? Biomes.DEEP_LUKEWARM_OCEAN : Biomes.WARM_OCEAN;
 		}
-		else if (temperature > 0.6 && humidity > 0.5) // Lukewarm
+		else if (temperature > 0.85 && humidity > 0.9) // Lukewarm
 		{
 			return isDeepOcean ? Biomes.DEEP_LUKEWARM_OCEAN : Biomes.LUKEWARM_OCEAN;
+		}
+		else if (temperature < 0.5) // Cold
+		{
+			return isDeepOcean ? Biomes.DEEP_COLD_OCEAN : Biomes.COLD_OCEAN;
 		}
 		else
 		{

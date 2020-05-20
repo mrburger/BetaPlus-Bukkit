@@ -46,7 +46,7 @@ public enum TerrainType
 	public static TerrainType getTerrainNoIsland(int[][] yVals, int xValChunk, int zValChunk)
 	{
 		int y = yVals[xValChunk][zValChunk];
-		if (y < BetaPlusPlugin.seaLevel - 1)
+		if (y < BetaPlusPlugin.seaLevel)
 		{
 			// Check if Depth exceeds the general threshold (Done before actual Depth applied)
 			if (y < MathHelper.floor(BetaPlusPlugin.seaLevel - (BetaPlusPlugin.seaDepth / BetaPlusPlugin.oceanYScale)))
@@ -58,8 +58,7 @@ public enum TerrainType
 				return sea;
 			}
 		}
-		// Trying -2 to fix.
-		else if (y >= BetaPlusPlugin.seaLevel - 2)
+		else if (y >= BetaPlusPlugin.seaLevel)
 		{
 			// If above a predetermined threshold, it must be "Hills" or "Mountains"
 			if (y >= altThreshold)
