@@ -31,7 +31,7 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 	private static final BiomeBase shrublandHills = Biomes.SAVANNA_PLATEAU;
 	private static final BiomeBase plainsHills = Biomes.PLAINS; // The only Non-Beta Type. Confusing though because plains don't have hills.
 	private static final BiomeBase seasonalForestHills = Biomes.FOREST;
-	private static final BiomeBase rainforestHills = Biomes.FOREST;
+	private static final BiomeBase rainforestHills = Biomes.FLOWER_FOREST;
 	private static final BiomeBase forestHills = Biomes.FOREST;
 	// Ocean and other declarations
 	private static final BiomeBase ocean = Biomes.OCEAN;
@@ -85,6 +85,7 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 		{
 			return isDeepOcean ? Biomes.FROZEN_RIVER : Biomes.FROZEN_RIVER;
 		}
+		/*
 		else if (temperature > 0.95 && humidity > 0.95) // Hot
 		{
 			return isDeepOcean ? Biomes.DEEP_LUKEWARM_OCEAN : Biomes.WARM_OCEAN;
@@ -97,6 +98,7 @@ public class BetaPlusBiomeSelector extends AbstractBiomeSelector
 		{
 			return isDeepOcean ? Biomes.DEEP_COLD_OCEAN : Biomes.COLD_OCEAN;
 		}
+		 */
 		else
 		{
 			return isDeepOcean ? Biomes.DEEP_OCEAN : Biomes.OCEAN;

@@ -37,6 +37,9 @@ public class WorldChunkManagerBeta extends WorldChunkManager
     public final double scaleVal;
     public final double mult;
     private double offsetVoronoi = 1024;
+    public final double tempAmplitude;
+    public final double noiseAmplitude;
+    public final double humidAmplitude = 0.3333333333333333;
 
     // BIOME CACHE
     //protected HashMap<ChunkCoordIntPair, >
@@ -45,10 +48,29 @@ public class WorldChunkManagerBeta extends WorldChunkManager
     public WorldChunkManagerBeta(World world)
     {
         super(biomeList);
-        //BetaPlusPlugin.LOGGER.log(Level.INFO, "Calling Provider");
         long seed = world.getSeed();
-        scaleVal = (1.0D / 39.999999404);
-        mult = 2;
+
+        // BIOME SCALE VALUE //
+        // INCREASE: LARGER BIOMES
+        // DECREASE: Biomes Smaller
+        // Originally ~40
+        scaleVal = (1.0D / 48d);
+
+        // UNKNOWN //
+        // INCREASE:
+        // DECREASE:
+        // Originally: 2
+        mult = 10;
+
+        // TEMP AMPLITUDE OF NOISE //
+        // INCREASE VALUE: More sharp changes
+        // DECREASE VALUE: All biomes stuck towards middle
+        // Originally 0.25
+        tempAmplitude = 0.25;
+
+        // Originally 0.5882352941176471 (1 / 1.7)
+        noiseAmplitude = 1.0D / 1.7D;
+
         temperatureOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 9871), 4);
         humidityOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 39811), 4);
         noiseOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 543321), 2);
@@ -160,9 +182,10 @@ public class WorldChunkManagerBeta extends WorldChunkManager
     private BiomeBase[] generateBiomes(int startX, int startZ, int xSize, int zSize, final boolean useAverage)
     {
         // Required for legacy operations
-        temperatures = temperatureOctave.generateOctaves(temperatures, (double) startX, (double) startZ, xSize, xSize, scaleVal, scaleVal, 0.25);
-        humidities = humidityOctave.generateOctaves(humidities, (double) startX, (double) startZ, xSize, xSize, scaleVal * mult, scaleVal * mult, 0.3333333333333333);
-        noise = noiseOctave.generateOctaves(noise, (double) startX, (double) startZ, xSize, xSize, 0.25, 0.25, 0.5882352941176471);
+        // Replaced xSize 2nd with zSize
+        temperatures = temperatureOctave.generateOctaves(temperatures, (double) startX, (double) startZ, xSize, zSize, scaleVal, scaleVal, tempAmplitude);
+        humidities = humidityOctave.generateOctaves(humidities, (double) startX, (double) startZ, xSize, zSize, scaleVal * mult, scaleVal * mult, humidAmplitude);
+        noise = noiseOctave.generateOctaves(noise, (double) startX, (double) startZ, xSize, zSize, 0.25, 0.25, noiseAmplitude);
 
         double vNoise;
         double offsetX;
@@ -206,8 +229,9 @@ public class WorldChunkManagerBeta extends WorldChunkManager
                 //double noiseVal = MathHelper.clamp(vNoise, 0.0, 0.99999999999999);
 
                 // An 0.3 throwback.
-                offsetX = biomeNoise.noise2((float) ((startX + x) / scaleVal), (float) ((startZ + z) / scaleVal)) * 80 + biomeNoise.noise2((startX + x) / 7, (startZ + z) / 7) * 20;
-                offsetZ = biomeNoise.noise2((float) ((startX + x) / scaleVal), (float) ((startZ + z) / scaleVal)) * 80 + biomeNoise.noise2((startX + x - 1000) / 7, (startX + x) / 7) * 20;
+                // Converted 7 to 7f
+                offsetX = biomeNoise.noise2((float) ((startX + x) / scaleVal), (float) ((startZ + z) / scaleVal)) * 80 + biomeNoise.noise2((startX + x) / 7f, (startZ + z) / 7f) * 20;
+                offsetZ = biomeNoise.noise2((float) ((startX + x) / scaleVal), (float) ((startZ + z) / scaleVal)) * 80 + biomeNoise.noise2((startX + x - 1000) / 7f, (startX + x) / 7f) * 20;
                 vNoise = (voronoi.noise((startX + x + offsetX + offsetVoronoi) / offsetVoronoi, (startZ + z - offsetZ) / offsetVoronoi, 1) * 0.5f) + 0.5f;
                 noiseVal = (voronoi.noise((startX + x + offsetX + 2000) / 180, (startZ + z - offsetZ) / 180, 1) * 0.5) + 0.5;
                 noiseVal = MathHelper.a(noiseVal, 0, 0.9999999);

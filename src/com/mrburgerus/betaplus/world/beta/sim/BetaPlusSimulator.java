@@ -20,6 +20,7 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 	private double[] humidities;
 	private double scaleVal;
 	private double mult;
+	private double tempAmp;
 
 	public BetaPlusSimulator(long seed, WorldChunkManagerBeta providerIn)
 	{
@@ -35,11 +36,15 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 		// Testing 0.5c
 		temperatureOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 9871), 4);
 		humidityOctave = new NoiseGeneratorOctavesBiome(new Random(seed * 39811), 4);
+		// Added to match the others
+		new NoiseGeneratorOctavesBiome(new Random(seed * 543321), 2);
 		scaleVal = providerIn.scaleVal;
 		mult = providerIn.mult;
+		tempAmp = providerIn.tempAmplitude;
 	}
 
 
+	// See WorldChunkManager.generateBiomes
 	@Override
 	protected double[] generateOctaves(double[] values, int xPos, int yValueZero, int zPos, int sizeX, int sizeY, int sizeZ)
 	{
@@ -49,8 +54,8 @@ public class BetaPlusSimulator extends AbstractWorldSimulator
 		}
 		double noiseFactor = 684.412D; // Replaced
 		// Added 0.5c
-		temps = temperatureOctave.generateOctaves(temps, (double) xPos * CHUNK_SIZE, (double) zPos * CHUNK_SIZE, sizeX * CHUNK_SIZE, sizeX * CHUNK_SIZE, scaleVal, scaleVal, 0.25);//provider.temperatures; //temperatureOctave.generateOctaves(temps, (double) xPos, (double) zPos, size1, size1, scaleVal, scaleVal, 0.25);
-		humidities = humidityOctave.generateOctaves(humidities, (double) xPos * CHUNK_SIZE, (double) zPos * CHUNK_SIZE, sizeX * CHUNK_SIZE, sizeX * CHUNK_SIZE, scaleVal * mult, scaleVal * mult, 0.3333333333333333); //provider.humidities; //humidityOctave.generateOctaves(humidities, (double) xPos, (double) zPos, size1, size1, scaleVal * mult, scaleVal * mult, 0.3333333333333333);
+		temps = temperatureOctave.generateOctaves(temps, (double) xPos * CHUNK_SIZE, (double) zPos * CHUNK_SIZE, sizeX * CHUNK_SIZE, sizeZ * CHUNK_SIZE, scaleVal, scaleVal, tempAmp);//provider.temperatures; //temperatureOctave.generateOctaves(temps, (double) xPos, (double) zPos, size1, size1, scaleVal, scaleVal, 0.25);
+		humidities = humidityOctave.generateOctaves(humidities, (double) xPos * CHUNK_SIZE, (double) zPos * CHUNK_SIZE, sizeX * CHUNK_SIZE, sizeZ * CHUNK_SIZE, scaleVal * mult, scaleVal * mult, 0.3333333333333333); //provider.humidities; //humidityOctave.generateOctaves(humidities, (double) xPos, (double) zPos, size1, size1, scaleVal * mult, scaleVal * mult, 0.3333333333333333);
 		// Old stuff
 		octaveArr4 = scaleNoise.generateNoiseOctaves(octaveArr4, xPos, zPos, sizeX, sizeZ, 1.121, 1.121, 0.5);
 		octaveArr5 = octaves7.generateNoiseOctaves(octaveArr5, xPos, zPos, sizeX, sizeZ, 200.0, 200.0, 0.5);

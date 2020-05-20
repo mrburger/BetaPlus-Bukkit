@@ -19,6 +19,7 @@ import java.util.Optional;
 // [0, 1) to [-0.5, 2.0]
 
 
+// UNDER CONSTRUCTION
 public class BetaPlusBiomeNew extends AbstractBiomeSelector
 {
 	// Fields

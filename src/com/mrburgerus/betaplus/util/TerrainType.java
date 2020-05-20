@@ -46,7 +46,8 @@ public enum TerrainType
 	public static TerrainType getTerrainNoIsland(int[][] yVals, int xValChunk, int zValChunk)
 	{
 		int y = yVals[xValChunk][zValChunk];
-		if (y < BetaPlusPlugin.seaLevel)
+		// Y - 1 to prevent beach encroachment
+		if (y < BetaPlusPlugin.seaLevel - 1)
 		{
 			// Check if Depth exceeds the general threshold (Done before actual Depth applied)
 			if (y < MathHelper.floor(BetaPlusPlugin.seaLevel - (BetaPlusPlugin.seaDepth / BetaPlusPlugin.oceanYScale)))
@@ -164,8 +165,10 @@ public enum TerrainType
 				}
 			}
 		}
-		// Catch it
-		return generic;
+		else
+		{
+			return coastal;
+		}
 		// Checking islands will be harder. Possibly delegate elsewhere?
 	}
 
